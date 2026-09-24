@@ -1,0 +1,278 @@
+---
+// src/components/Sections/Global/Navbar.astro - la barre flottante : marque, quatre rubriques, recherche, theme, tiroir mobile et etat retracte au scroll.
+//
+// Une barre de blog n'a pas de mega-menu. Le lecteur arrive par un article
+// partage, jamais par l'accueil : la barre doit lui dire ou il a atterri et lui
+// offrir quatre sorties lisibles, pas deployer un panneau au survol.
+//
+// data-shrunk est pose par ./_navbar.ts et lu par trois endroits : le CSS
+// local (la pilule se resserre), et materials.css, dont la regle
+// [data-header][data-shrunk="true"]::after degrade le contenu la ou la barre le
+// recouvre vraiment. Renommer cet attribut casse le fondu de bord.
+import { Icon } from "@components/svg/icons";
+import { Sheet, SheetClose, SheetHeader, SheetTitle, SheetTrigger } from "@components/ui/sheet";
+import { ThemeToggle } from "@components/ui/theme-toggle";
+import { getNavData, getSiteRoutes } from "@config/navData.json.ts";
+import siteData from "@config/siteData.json";
+import { getLocale, useTranslations } from "@i18n";
+
+const locale = getLocale(Astro);
+const t = useTranslations(locale);
+const navData = getNavData(locale);
+const routes = getSiteRoutes(locale);
+
+// Etat actif : correspondance exacte ou par prefixe, pour qu'un billet allume
+// "Posts". La racine ne compte jamais comme prefixe, sinon elle serait active
+// sur toutes les pages du site.
+const path = Astro.url.pathname;
+const isActive = (href: string): boolean =>
+  path === href || (href !== routes.home && path.startsWith(href));
+
+// Lien de nav : il herite de la couleur de la barre au lieu de la fixer, ce qui
+// le laisse lisible en clair comme en sombre sans une seule variante dark:.
+// Aucune classe d'affichage dans une chaine partagee. Le seul appelant
+// d'aujourd'hui n'en souffre pas, mais Aloha portait la meme chaine et le
+// piege s'y est declenche : un "hidden lg:inline-flex" pose par l'appelant
+// perd contre le "inline-flex" de la chaine, parce que Tailwind emet
+// .inline-flex apres .hidden et que les deux pesent pareil. Le lien restait
+// visible sur telephone. On retire la cause partout, pas seulement la ou elle
+// a deja mordu.
+const navLink = [
+  "min-h-11 items-center rounded-pill px-3.5",
+  "font-sans text-[0.9rem] font-medium whitespace-nowrap text-current",
+  "transition-colors duration-200 hover:bg-current/8",
+].join(" ");
+
+---
+
+{/* Le lien d'evitement est le premier element focalisable du document. Il ne
+    se voit qu'au clavier, ou il est la premiere chose dont on a besoin. */}
+<a
+  href="#content"
+  class="bg-primary text-primary-foreground font-display sr-only rounded-pill px-5 py-3 text-sm font-bold focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-100"
+>
+  {t.common.skipToContent}
+</a>
+
+{/* La barre respecte l'encoche (safe-area) et traverse les navigations sans
+    etre reconstruite : elle ne clignote pas et garde son etat retracte. */}
+{/* Le decalage du haut vit dans le bloc <style is:global> plus bas, en
+    regles [data-header]{top:...}, et NULLE PART ailleurs. Aucun utilitaire
+    Tailwind de top ici : un utilitaire bat la regle globale et fige la
+    barre a une seule valeur, ce qui colle la pilule au bord de la fenetre
+    et la fait deborder au-dessus du cadre arrondi du panneau.
+
+    Les trois paliers (1.25 / 1.5 / 1.75rem) suivent le cadre p-2 / p-3 /
+    p-4 : la pilule tombe TOUJOURS a l interieur du panneau, avec la meme
+    respiration que le bord gauche. En etat retracte elle remonte, voir la
+    regle [data-shrunk] plus bas. L encoche l emporte toujours : env()
+    reste dans le max().
+
+    Ce commentaire etait pose A L INTERIEUR de la balise ouvrante : astro
+    check ne parvenait plus a parser le fichier et sortait douze erreurs. Un
+    commentaire se met AU-DESSUS de la balise, jamais entre le nom et sa
+    premiere prop. */}
+<header
+  class="fixed inset-x-0 z-50"
+  data-header
+  transition:persist
+>
+  <div class="container-page" data-header-track>
+    <nav
+      class="glass-light text-foreground rounded-pill flex items-center gap-2 py-2.5 pr-2.5 pl-5"
+      aria-label={t.nav.mainLabel}
+      data-navbar
+    >
+      <a
+        href={routes.home}
+        class="flex min-h-11 shrink-0 items-center gap-2 text-current"
+        aria-label={t.nav.brandHome}
+        data-header-brand
+      >
+        <Icon name="wave" size={20} class="text-primary" />
+        <span class="font-display text-lg font-semibold tracking-tight">{siteData.name}</span>
+      </a>
+
+      <ul class="mx-auto hidden items-center gap-0.5 lg:flex">
+        {
+          navData.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={["inline-flex", navLink, isActive(item.href) && "bg-current/8 font-semibold"]}
+                aria-current={isActive(item.href) ? "page" : undefined}
+              >
+                {item.text}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="ml-auto flex items-center gap-1 lg:ml-0">
+        <a
+          href={routes.search}
+          class="hover:bg-current/8 grid size-11 place-items-center rounded-pill text-current transition-colors duration-200"
+          aria-label={t.nav.search}
+        >
+          <Icon name="search" size={19} />
+        </a>
+        <ThemeToggle class="text-current hover:bg-current/8" label={t.nav.toggleTheme} />
+        <SheetTrigger
+          for="mobile-nav"
+          variant="ghost"
+          size="icon"
+          class="text-current hover:bg-current/8 lg:hidden"
+          aria-label={t.nav.openMenu}
+        >
+          <Icon name="menu" size={21} />
+        </SheetTrigger>
+      </div>
+    </nav>
+  </div>
+</header>
+
+{/* Le tiroir : meme <dialog> natif que Dialog, et son geste de fermeture est
+    deja branche par la primitive. Rien a cabler ici. */}
+<Sheet id="mobile-nav" side="right" describedby={null}>
+  <SheetClose />
+  <SheetHeader>
+    <SheetTitle id="mobile-nav-title" class="flex items-center gap-2">
+      <Icon name="wave" size={20} class="text-primary" />
+      {siteData.name}
+    </SheetTitle>
+  </SheetHeader>
+
+  <nav aria-label={t.nav.mobileLabel}>
+    <ul class="flex flex-col">
+      {
+        [...navData, { text: t.nav.search, href: routes.search }].map(
+          (item) => (
+            <li>
+              <a
+                href={item.href}
+                class="font-display text-foreground hover:bg-muted flex min-h-12 items-center rounded-card px-3 text-lg font-semibold"
+                aria-current={isActive(item.href) ? "page" : undefined}
+              >
+                {item.text}
+              </a>
+            </li>
+          ),
+        )
+      }
+    </ul>
+  </nav>
+</Sheet>
+
+<script>
+  // Le moteur vit dans ./_navbar.ts : limite de 400 lignes par fichier, et le
+  // precede de _dialog.ts et _film.ts pour tout comportement non trivial.
+  import "./_navbar";
+</script>
+
+<style is:global>
+  /* .glass-light est calibree pour un fond clair : en theme sombre, la barre se
+   * re-ancre sur les tokens pour rester lisible. */
+  .dark [data-navbar].glass-light {
+    background: color-mix(in oklab, var(--reef-background) 76%, transparent);
+    border-color: var(--reef-border);
+  }
+
+  /* --- Barre retractable ---------------------------------------------------
+   * En haut de page : pleine largeur du conteneur, respiration genereuse. Des
+   * que le visiteur descend : la piste se resserre, la pilule se compacte et se
+   * rapproche du bord. Une seule courbe pour les trois, pour que le mouvement
+   * se lise comme un seul geste et non comme trois animations concurrentes. */
+  /* --- Le jeu entre la barre et le cadre -----------------------------------
+   * La scene du hero est posee dans un cadre arrondi qui laisse une marge de
+   * 0.5rem a 1rem contre le bord de la fenetre. La barre, elle, etait fixee a
+   * 1rem du haut : a partir de la borne md, les deux valeurs devenaient egales
+   * et le bord haut de la pilule venait se coller pile sur le bord haut du
+   * cadre. Deux bords arrondis qui se touchent, ca ne se lit pas comme une
+   * superposition, ca se lit comme un defaut d'alignement.
+   *
+   * La barre descend donc d'un cran de plus que le cadre a chaque borne, ce
+   * qui laisse toujours un jeu visible entre les deux. L'encoche l'emporte
+   * toujours : env() reste dans le max().
+   *
+   * NE PAS deplacer ces valeurs dans la classe du <header> : un utilitaire
+   * Tailwind [top:...] bat ces regles, fige les trois paliers a une seule
+   * valeur, et la pilule repasse au-dessus du coin arrondi du cadre. */
+  [data-header] {
+    top: max(1.25rem, env(safe-area-inset-top));
+  }
+
+  @media (min-width: 40rem) {
+    [data-header] {
+      top: max(1.5rem, env(safe-area-inset-top));
+    }
+  }
+
+  @media (min-width: 48rem) {
+    [data-header] {
+      top: max(1.75rem, env(safe-area-inset-top));
+    }
+  }
+
+  [data-header] {
+    transition: top 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  [data-header][data-shrunk="true"] {
+    top: max(0.375rem, env(safe-area-inset-top));
+  }
+
+  [data-header-track] {
+    transition: max-width 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  /* La largeur resserree est MESUREE, pas choisie : --header-compact est pose
+   * par _navbar.ts, apres avoir demande au navigateur la place que prend
+   * reellement le contenu de la barre. Le repli 100% est volontaire : si le
+   * script ne tourne pas, la barre garde sa largeur pleine et ne perd que son
+   * mouvement, au lieu de laisser ses boutons deborder du verre. */
+  [data-header][data-shrunk="true"] [data-header-track] {
+    max-width: min(100%, var(--header-compact, 100%));
+  }
+
+  /* Le temps d'une mesure, aucune transition : sinon on mesure une image
+   * intermediaire de l'animation et la barre se fige a la mauvaise largeur. */
+  [data-header][data-measuring],
+  [data-header][data-measuring] * {
+    transition: none !important;
+  }
+
+  [data-navbar] {
+    transition:
+      padding 420ms cubic-bezier(0.22, 0.61, 0.36, 1),
+      background-color 300ms,
+      border-color 300ms,
+      box-shadow 300ms,
+      color 300ms;
+  }
+
+  [data-header][data-shrunk="true"] [data-navbar] {
+    padding-block: 0.3125rem;
+    padding-left: 0.875rem;
+    padding-right: 0.375rem;
+  }
+
+  /* Le mot-marque suit le mouvement, discretement. */
+  [data-header-brand] span {
+    transition: font-size 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  [data-header][data-shrunk="true"] [data-header-brand] span {
+    font-size: 1rem;
+  }
+
+  /* Personne ne doit subir ce mouvement s'il a demande le calme. */
+  @media (prefers-reduced-motion: reduce) {
+    [data-header],
+    [data-header-track],
+    [data-navbar],
+    [data-header-brand] span {
+      transition: none;
+    }
+  }
+</style>

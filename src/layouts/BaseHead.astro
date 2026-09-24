@@ -1,0 +1,199 @@
+---
+// src/layouts/BaseHead.astro - la couche SEO possedee : meta, canonical, OG, twitter, favicon, fonts, view transitions.
+// Chaque balise est ecrite a la main, lisible et modifiable ici : zero paquet SEO.
+// L'italique d'Instrument Sans est charge separement, et ce n'est pas un oubli
+// de l'avoir mis la : sans lui, le navigateur FABRIQUE l'italique en penchant
+// le romain, ce qui casse les liaisons et raidit les courbes. Sur un theme dont
+// tout l'argument est la qualite de lecture, un <em> en oblique synthetique se
+// remarque dans le premier paragraphe. Le fichier ne part que si une italique
+// est reellement peinte, et il ne bloque rien (font-display: swap).
+//
+// Deux familles chargees, pas une de plus : Space Grotesk (affichage) et
+// Instrument Sans (texte). Le mot d'accent des titres garde la police du titre
+// et porte une vague turquoise soulignee (--accent-wave, tokens.css) : aucune
+// serif ni italique d'accent n'est chargee.
+import "@fontsource-variable/space-grotesk";
+import "@fontsource-variable/instrument-sans";
+import "@fontsource-variable/instrument-sans/wght-italic.css";
+// LES DEUX FICHIERS DE POLICE, PRECHARGES. Les regles @font-face partent dans
+// la feuille en ligne, donc le navigateur ne decouvre le woff2 qu'apres avoir
+// lu le CSS : il peint d'abord avec la police de secours, puis echange. Sur
+// Kona cet echange faisait sauter le premier ecran de 0,168 de CLS, parce que
+// le h1 est borne en ch, une unite qui depend de la police active, et que le
+// bloc est centre par my-auto : la largeur change, le titre se replie
+// autrement, le bloc se recentre. Precharger supprime la classe entiere de
+// defaut, pas seulement le cas du jour.
+import policeAffichage from "@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2?url";
+import policeTexte from "@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2?url";
+import siteData from "@config/siteData.json";
+import siteSettings from "@config/siteSettings.json";
+import { defaultLocale, getAlternates, getLocale, localeMeta } from "@i18n";
+import tokensRaw from "@styles/tokens.css?raw";
+import { ClientRouter } from "astro:transitions";
+
+export interface Props {
+  title: string;
+  description?: string;
+  image?: { src: string; alt: string };
+  type?: "website" | "article";
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = siteData.description,
+  image = siteData.defaultImage,
+  type = "website",
+  noindex = false,
+} = Astro.props;
+
+// "Titre | Marque", sauf si le titre porte deja la marque (page d'accueil).
+const fullTitle = title.includes(siteData.name) ? title : `${title} | ${siteData.name}`;
+
+// Canonical : une seule forme d'URL, celle de trailingSlash "always" dans astro.config.
+// Les routes fichiers (rss.xml, robots.txt) gardent leur extension telle quelle.
+const base = Astro.site ?? Astro.url;
+const pathname = Astro.url.pathname;
+const canonicalPath = pathname.endsWith("/") || /\.[a-z0-9]+$/i.test(pathname) ? pathname : `${pathname}/`;
+const canonical = new URL(canonicalPath, base);
+const imageUrl = new URL(image.src, base);
+
+// Les versions linguistiques de CETTE page, pas de l'accueil. La meme fonction
+// alimente le selecteur de langue de la barre : les deux ne peuvent pas mentir
+// l'un sur l'autre. x-default pointe vers la langue par defaut, ce que Google
+// attend pour choisir quoi servir a un visiteur dont la langue n'est pas servie.
+const locale = getLocale(Astro);
+const alternates = getAlternates(Astro.url, Astro.site, locale);
+const xDefault = alternates.find((alt) => alt.locale === defaultLocale);
+// og:locale veut du snake_case (en_US), pas du BCP-47 (en-US).
+const ogLocale = localeMeta[locale].intl.replace("-", "_");
+const ogAlternates = alternates.filter((alt) => !alt.current);
+// Les couleurs de marque sont RESOLUES depuis tokens.css au moment du build.
+//
+// Ce bloc nommait des entrees de palette et portait un hexa de repli par
+// couleur. Deux fautes, et la seconde etait la plus couteuse : un repli est
+// une valeur figee, donc le jour ou la lecture rate, le favicon et la barre du
+// navigateur se peignent dans l'ANCIENNE marque sans que rien ne le signale.
+// Un theme repeint par `pnpm rebrand` qui garde le favicon du voisin est un
+// defaut que l'acheteur decouvre en production.
+//
+// On demande donc des ROLES, pas des couleurs : le fond du favicon est le
+// `background` sombre, la barre du navigateur le `background` de chaque mode.
+// Le resolveur suit les var() a travers les trois etages de tokens.css
+// (@theme pour les familles, :root pour la version claire, .dark pour la
+// sombre) et LEVE une erreur s'il n'aboutit pas. Un build qui echoue vaut
+// mieux qu'un favicon qui ment.
+const cssBlock = (pattern: RegExp): string => pattern.exec(tokensRaw)?.[1] ?? "";
+const themeBlock = cssBlock(/@theme\s*\{([\s\S]*?)\n\}/);
+const inlineBlock = cssBlock(/@theme inline\s*\{([\s\S]*?)\n\}/);
+const lightBlock = cssBlock(/\n:root\s*\{([\s\S]*?)\n\}/);
+const darkBlock = cssBlock(/\n\.dark[^{]*\{([\s\S]*?)\n\}/);
+
+function resolveToken(name: string, scope: string, depth = 0): string {
+  if (depth > 8) throw new Error(`tokens.css : chaine de var() circulaire sur --${name}`);
+  for (const source of [scope, inlineBlock, themeBlock, lightBlock]) {
+    const hit = new RegExp(`--${name}:\\s*([^;]+);`).exec(source);
+    if (!hit) continue;
+    const value = hit[1].trim();
+    const indirect = /^var\(--([a-z0-9-]+)\)$/.exec(value);
+    return indirect ? resolveToken(indirect[1], scope, depth + 1) : value;
+  }
+  throw new Error(`tokens.css : jeton --${name} introuvable, le favicon ne peut pas etre peint`);
+}
+
+// Seuls les deux fonds restent lus ici : ils peignent la barre du navigateur
+// (theme-color). L'accent et le primaire l'etaient aussi, pour dessiner le
+// favicon ; ils sont partis avec lui vers scripts/favicon.mjs, qui relit les
+// memes jetons avec le meme resolveur.
+const groundDark = resolveToken("color-background", darkBlock);
+const groundLight = resolveToken("color-background", lightBlock);
+
+// LE FAVICON N'EST PLUS DESSINE ICI. Il l'a ete longtemps, en SVG inline dans
+// une data-uri : aucun fichier a servir, aucune requete de plus, et le dessin
+// suivait un pnpm rebrand sans rien regenerer. C'etait elegant et c'etait faux.
+//
+// Google ne montre un favicon dans ses resultats que s'il peut le CRAWLER, et
+// il ne lit que des images matricielles : sa documentation liste BMP, GIF, ICO,
+// PNG, JPEG, PPM et TIFF. Le SVG n'y est pas, et une data-uri n'est pas une
+// adresse a crawler. Un site livre ainsi sort dans les resultats avec le globe
+// gris generique. Le defaut ne se voit dans aucun navigateur, dans aucun audit
+// de page et dans aucun test : il ne se voit que dans une page de resultats.
+//
+// Le dessin vit maintenant dans scripts/favicon.mjs, qui ecrit favicon.svg,
+// favicon.ico (16, 32 et 48), favicon-96.png et apple-touch-icon.png dans
+// public/ a chaque build. Un pnpm rebrand les repeint comme avant, puisque le
+// script relit les memes jetons. Ici il ne reste que les liens.
+---
+
+<meta charset="utf-8" />
+{/* viewport-fit=cover : necessaire pour que env(safe-area-inset-*) fonctionne
+    sur iPhone a encoche, en Safari comme dans une coquille Capacitor. */}
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="generator" content={Astro.generator} />
+
+{/* crossorigin est OBLIGATOIRE sur un preload de police : sans lui le
+    navigateur telecharge le fichier deux fois, une fois en anonyme pour
+    le prechargement et une fois pour @font-face. */}
+<link rel="preload" href={policeAffichage} as="font" type="font/woff2" crossorigin />
+<link rel="preload" href={policeTexte} as="font" type="font/woff2" crossorigin />
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical.href} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+{/* L'ordre compte pour les navigateurs, pas pour Google : le SVG est
+    prefere quand il est compris, l'ICO sert de repli et reste ce que
+    Googlebot-Image sait lire. L'ICO est aussi a /favicon.ico, l'adresse que
+    tout navigateur demande de lui-meme meme sans balise.
+
+    Google ne montre un favicon dans ses resultats que s'il peut l'explorer
+    en matriciel : le SVG inline ne compte pas, seuls l'ICO et le PNG comptent.
+    Et `sizes` doit dire la verite sur son fichier : scripts/favicon.mjs
+    empaquette 16, 32 et 48 dans l'ICO, donc la balise les declare tous les
+    trois, et le PNG de 96 qu'il ecrit a chaque build est declare aussi, au
+    lieu d'etre servi sans que personne ne sache qu'il existe. */}
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+<link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+
+{/* hreflang : chaque page declare ses soeurs, y compris elle-meme. Un ensemble
+    hreflang incomplet est pire que pas de hreflang du tout, donc la liste est
+    generee, jamais ecrite a la main. */}
+{alternates.map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
+{xDefault && <link rel="alternate" hreflang="x-default" href={xDefault.href} />}
+
+{/* La barre du navigateur suit le theme : le fond clair de la page en
+    clair, le fond sombre en sombre. Les deux sont resolus depuis
+    --color-background, donc un rebranding les emmene avec lui. */}
+<meta name="theme-color" media="(prefers-color-scheme: light)" content={groundLight} />
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content={groundDark} />
+
+{/* Open Graph, complet : l'apercu de partage est la premiere impression du site. */}
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonical.href} />
+<meta property="og:site_name" content={siteData.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={imageUrl.href} />
+<meta property="og:image:alt" content={image.alt} />
+<meta property="og:locale" content={ogLocale} />
+{
+  ogAlternates.map((alt) => (
+    <meta property="og:locale:alternate" content={localeMeta[alt.locale].intl.replace("-", "_")} />
+  ))
+}
+
+<meta name="twitter:card" content="summary_large_image" />
+{siteData.author.twitter && <meta name="twitter:site" content={`@${siteData.author.twitter}`} />}
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl.href} />
+<meta name="twitter:image:alt" content={image.alt} />
+
+{/* Le slot recoit les <script type="application/ld+json"> construits avec @js/schema. */}
+<slot />
+
+{siteSettings.useViewTransitions && <ClientRouter />}

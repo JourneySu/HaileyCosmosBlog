@@ -1,0 +1,158 @@
+---
+// src/components/Sections/Home/NewsletterInvite.astro - l'invitation a s'abonner : une scene sombre, la lettre a gauche, le flux a droite.
+//
+// C'est la deuxieme et derniere image de la page, et c'est voulu. La bande
+// precedente etait un formulaire pose sur un aplat gris, a un ton du fond de la
+// page : la seule section qui demande quelque chose au lecteur etait aussi la
+// plus discrete de l'accueil. Elle reprend donc le materiau du premier ecran,
+// halos compris, et referme la page sur la scene qui l'a ouverte.
+//
+// Les deux moyens sont montres ensemble a dessein. Une invitation qui ne propose
+// qu'une adresse email traite le flux comme un detail technique, alors que c'est
+// le seul abonnement qui ne demande rien au lecteur et ne coute rien a l'auteur.
+//
+// C'est aussi cette section qui porte id="newsletter", la cible du bouton
+// "S'abonner" de la barre. Le pied de page cede l'ancre et son formulaire des
+// que la page porte cette bande : deux formulaires identiques a deux ecrans
+// d'ecart, c'est une page qui bafouille.
+//
+// Le formulaire est une DEMONSTRATION : il n'envoie rien et n'a volontairement
+// pas d'action. Voir le commentaire du meme bloc dans Sections/Global/Footer.astro
+// pour le brancher sur un prestataire.
+import { Button } from "@components/ui/button";
+import { Input } from "@components/ui/input";
+import { getLocale, useTranslations } from "@i18n";
+import { Image } from "astro:assets";
+import heroVague from "../../../assets/reef-hero-vague.webp";
+
+const locale = getLocale(Astro);
+const t = useTranslations(locale);
+
+const title = t.newsletter.title;
+const accent = t.newsletter.accent;
+const at = title.toLowerCase().indexOf(accent.toLowerCase());
+const before = at >= 0 ? title.slice(0, at) : title;
+const word = at >= 0 ? title.slice(at, at + accent.length) : "";
+const after = at >= 0 ? title.slice(at + accent.length) : "";
+---
+
+{/* Le cadre est sur le MEME papier que le pied de page, et non sur le fond de
+    page. Mesure a l'origine de ce reglage : la fin de page enchainait quatre
+    encres en six cents pixels, la bande des signatures en papier, un filet de
+    fond de page, la scene sombre, un second filet de fond de page, puis le pied
+    en papier. Quatre changements de teinte que rien ne justifie se lisent comme
+    trois blocs mal raccordes, pas comme une composition. Sur un seul papier
+    continu, il ne reste qu'un objet sombre pose dedans, ce qui est exactement
+    ce que la section est. */}
+<div class="bg-surface p-2 sm:p-3 md:p-4" data-slot="newsletter-invite">
+  <section
+    class="deep-scene rounded-panel relative isolate overflow-hidden"
+    id="newsletter"
+    aria-labelledby="invite-title"
+  >
+    {/* La photographie, tout au fond. Ce bloc portait deux halos flous, un
+        corail en haut a gauche et un turquoise en bas a droite, qui derivaient
+        lentement. Ils donnaient a la fin de page un coin orange, et cette
+        temperature-la est exactement celle que le public associe aux pages
+        generees par une machine : le meme effet se retrouve sur des milliers
+        de sites, donc il ne dit plus rien de la maison.
+
+        C'est la photographie du premier ecran, recadree sur le bas. La section
+        se donnait deja pour mission de "refermer la page sur la scene qui l'a
+        ouverte" : elle le fait maintenant avec la scene elle-meme au lieu d'une
+        imitation en CSS. Un seul fichier pour les deux emplacements, donc rien
+        de plus a telecharger.
+
+        Decorative au sens strict, le titre dit deja ce que fait ce bandeau :
+        alt vide et aria-hidden. Chargee paresseusement, c'est le bas de la
+        page et personne ne l'attend. */}
+    <Image
+      src={heroVague}
+      alt=""
+      widths={[720, 1200, 1800]}
+      sizes="100vw"
+      loading="lazy"
+      decoding="async"
+      class="pointer-events-none absolute inset-0 -z-30 size-full object-cover object-[center_78%]"
+      aria-hidden="true"
+    />
+
+    {/* Le voile : dense a gauche, la ou le texte et le formulaire se posent,
+        ouvert a droite pour que la photo existe vraiment. Il bascule en
+        vertical sous 1024 px, quand le texte occupe toute la largeur. */}
+    <div class="invite-veil pointer-events-none absolute inset-0 -z-20" aria-hidden="true"></div>
+
+    <div class="container-page relative z-10 py-16 md:py-24">
+      <div class="measure-wide flex flex-col gap-5">
+        <span class="bg-primary h-0.5 w-12 rounded-pill" aria-hidden="true"></span>
+        <h2 id="invite-title" class="font-display text-display-sm md:text-display-md">
+          {
+            word ? (
+              <Fragment>
+                {before}
+                <span class="accent-script">{word}</span>
+                {after}
+              </Fragment>
+            ) : (
+              title
+            )
+          }
+        </h2>
+        <p class="text-muted-foreground measure-wide text-lg leading-relaxed">{t.newsletter.lede}</p>
+
+        <form class="mt-2 flex flex-col gap-3 sm:max-w-xl sm:flex-row" name="newsletter-home">
+          <label class="sr-only" for="home-newsletter-email">{t.newsletter.emailLabel}</label>
+          <Input
+            id="home-newsletter-email"
+            class="sm:flex-1"
+            type="email"
+            name="email"
+            size="lg"
+            placeholder={t.newsletter.placeholder}
+            autocomplete="email"
+            spellcheck="false"
+            aria-describedby="home-newsletter-note"
+            required
+          />
+          <Button type="submit" variant="primary" size="lg" class="sm:shrink-0">
+            {t.newsletter.submit}
+          </Button>
+        </form>
+        <p id="home-newsletter-note" class="text-muted-foreground text-sm">{t.newsletter.note}</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  /* Le voile du bandeau d'invitation.
+
+     La couleur est lue sur --reef-background, que .deep-scene force a l'encre
+     juste au-dessus. Passer par var(--color-background) donnerait la valeur
+     calculee sur :root, c'est-a-dire le papier, et repeindrait la photo.
+
+     Les paliers sont denses : la photographie est claire a gauche, et un
+     formulaire blanc sur une ecume blanche ne se lit pas. */
+  .invite-veil {
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--reef-background) 94%, transparent) 0%,
+      color-mix(in oklab, var(--reef-background) 86%, transparent) 52%,
+      color-mix(in oklab, var(--reef-background) 42%, transparent) 100%
+    );
+  }
+
+  /* Sous 1024 px le texte occupe toute la largeur et tombe donc sur la partie
+     ouverte du degrade. Sur une image claire, le texte blanc n'est plus
+     lisible : le voile devient vertical. */
+  @media (max-width: 63.99rem) {
+    .invite-veil {
+      background: linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--reef-background) 92%, transparent) 0%,
+        color-mix(in oklab, var(--reef-background) 94%, transparent) 58%,
+        color-mix(in oklab, var(--reef-background) 84%, transparent) 100%
+      );
+    }
+  }
+</style>

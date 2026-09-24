@@ -1,0 +1,105 @@
+---
+// src/pages/[...locale]/index.astro - l'accueil editorial : ouverture, billet a la une, notes recentes, sujets et mot du studio.
+//
+// L'accueil d'un blog n'est pas une page commerciale : il n'y a ni preuve sociale,
+// ni tarifs, ni bandeau de logos. Un lecteur arrive pour savoir s'il y a quelque
+// chose a lire, et la reponse doit tenir dans le premier ecran et demi.
+//
+// Toutes les listes sont calculees ICI, une seule fois. Les sections recoivent
+// des tableaux deja tries : aucune d'elles ne relit une collection, donc rien ne
+// peut trier differemment d'une section a l'autre.
+import Footer from "@components/Sections/Global/Footer.astro";
+import Navbar from "@components/Sections/Global/Navbar.astro";
+import FeaturedPost from "@components/Sections/Home/FeaturedPost.astro";
+import FilmScene from "@components/Sections/Home/FilmScene.astro";
+import Hero from "@components/Sections/Home/Hero.astro";
+import LatestPosts from "@components/Sections/Home/LatestPosts.astro";
+import TopicMarquee from "@components/Sections/Home/TopicMarquee.astro";
+import TopicStrip from "@components/Sections/Home/TopicStrip.astro";
+import siteData from "@config/siteData.json";
+import { getLocale, localePaths, localizePath, useTranslations } from "@i18n";
+import { getResolvedPosts, getSortedTopics } from "@js/posts";
+import { organization, website } from "@js/schema";
+import BaseLayout from "@layouts/BaseLayout.astro";
+
+// Une seule page source, une sortie par langue : / et /fr/.
+export const getStaticPaths = localePaths;
+
+const locale = getLocale(Astro);
+const t = useTranslations(locale);
+
+const posts = await getResolvedPosts(locale);
+
+// Le garde-fou "un seul billet a la une" vit ici : le schema ne peut pas
+// compter les autres fichiers, mais la page les voit tous. Si personne n'a
+// leve le drapeau, le plus recent prend la place.
+const featured = posts.find((entry) => entry.post.data.featured) ?? posts.at(0);
+const latest = posts.filter((entry) => entry !== featured).slice(0, 6);
+
+const topics = await getSortedTopics(locale);
+
+// Un seul passage sur les billets pour ce compteur : compter dans les
+// sections obligerait a leur passer la liste complete, qu'elles n'affichent pas.
+const topicCounts: Record<string, number> = {};
+for (const entry of posts) {
+  topicCounts[entry.topicSlug] = (topicCounts[entry.topicSlug] ?? 0) + 1;
+}
+
+// Le compte de ce qu'il y a a lire, dans l'ordre des libelles de heroLedger :
+// notes publiees, fils. Compte ici comme le reste, pour que le hero n'ait
+// aucune collection a relire.
+const ledger = [posts.length, topics.length] as const;
+
+const title = t.home.metaTitle;
+const description = t.home.metaDescription;
+
+const base = Astro.site ?? Astro.url;
+const siteUrl = new URL(localizePath("/", locale), base).href;
+const schemas = [
+  organization({
+    name: siteData.name,
+    url: siteUrl,
+    sameAs: siteData.author.twitter ? [`https://x.com/${siteData.author.twitter}`] : undefined,
+  }),
+  website({ name: siteData.name, url: siteUrl, description }),
+];
+---
+
+<BaseLayout {title} {description}>
+  <Fragment slot="head">
+    {
+      schemas.map((node) => (
+        <script is:inline type="application/ld+json" set:html={JSON.stringify(node)} />
+      ))
+    }
+  </Fragment>
+
+  <Navbar />
+
+  <main id="content">
+    <Hero {ledger} />
+    {/* La bande defilante mord les deux bords juste sous le hero : c'est elle
+        qui casse la largeur de panneau du premier ecran et lance le rythme de
+        la page. Elle porte les vrais sujets, pas des mots decoratifs. */}
+    <TopicMarquee {topics} counts={topicCounts} />
+    {featured && <FeaturedPost entry={featured} />}
+    {/* La sequence filmee remplace le bloc "mot du studio" : c'est le meme
+        message, mais le lecteur le deroule lui-meme. Le composant StudioNote
+        reste dans le theme pour qui prefere un bloc sans video.
+
+        Elle est placee ICI, juste apres le billet a la une, et pas en fin de
+        page ou elle avait ete posee d'abord. La raison est une mesure : en
+        fin de page elle donnait trois blocs sombres a la suite, la scene
+        filmee, le panneau d'abonnement et le pied de page, separes par une
+        bande de 18 px de fond de page. Deux blocs de la meme encre separes
+        par un filet d'une encre voisine ne se lisent pas comme une
+        composition, ils se lisent comme un raccord rate. Au milieu de la
+        page, la sequence coupe au contraire deux grilles de cartes, ce qui
+        est exactement ce qu'une pleine largeur doit faire. */}
+    <FilmScene />
+    {latest.length > 0 && <LatestPosts posts={latest} />}
+    <TopicStrip {topics} counts={topicCounts} />
+  </main>
+
+  <Footer />
+</BaseLayout>

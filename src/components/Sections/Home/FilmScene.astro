@@ -1,0 +1,354 @@
+---
+// src/components/Sections/Home/FilmScene.astro - la sequence filmee : une video
+// que le lecteur deroule lui-meme en descendant la page.
+//
+// Ce que c'est, et pourquoi ce n'est pas une video de fond
+// -------------------------------------------------------
+// Une video de fond joue toute seule et le lecteur la regarde passer. Ici,
+// c'est l'inverse : la position de lecture est branchee sur la position de
+// defilement, donc c'est la MAIN du lecteur qui fait avancer l'image. Il
+// s'arrete, l'image s'arrete. Il remonte, l'image remonte. C'est ce lien
+// direct qui fait l'effet, et aucune animation en boucle ne le remplace.
+//
+// Le portage vient de la home d'Aloha Pixel, ou le procede tourne en
+// production. Les garde-fous ci-dessous ne sont pas theoriques : ils sont la
+// parce que le cas s'est produit.
+//
+// 1. UNE VIDEO NE SE DEPLACE PAS INSTANTANEMENT. Demander une image que le
+//    decodeur n'a pas encore, c'est une saccade. On borne donc la portion
+//    jouee pour qu'il reste au moins ~1,2 pixel de defilement par image
+//    (course / 36). Une video plus longue que la course disponible est
+//    tronquee plutot que hachee.
+//
+// 2. LE DEPLACEMENT PEUT ETRE REFUSE. Certains navigateurs et certains
+//    reseaux ne servent pas les plages d'octets qu'exige un deplacement
+//    arbitraire. On compte les essais : au bout de 40 essais et 8 secondes
+//    sans un seul deplacement abouti, on abandonne le procede et la video
+//    repasse en lecture en boucle. Le lecteur voit une video, jamais un trou.
+//
+// 3. LA VIDEO NE PESE PAS SUR LE PREMIER ECRAN. Elle n'est telechargee
+//    qu'apres trois conditions reunies : un vrai geste de defilement, la
+//    section proche de l'ecran, et le navigateur inoccupe. Qui ne descend pas
+//    ne telecharge rien.
+//
+// 4. MOUVEMENT REDUIT ET ECONOMIE DE DONNEES. Dans les deux cas la section
+//    devient une image fixe avec son texte. Rien ne bouge, rien ne se
+//    telecharge, et le message reste entier.
+//
+// La scene porte .deep-scene : elle reste sombre dans les deux themes. Son CSS
+// vise les alias --reef-* et NON les utilitaires --color-*, et la nuance vaut
+// d'etre retenue : --color-background est declaree sur :root, donc sa
+// substitution se calcule la-haut, en clair, et cette valeur claire descend
+// telle quelle dans le sous-arbre. Une scene sombre qui ecrit
+// var(--color-background) peint donc du blanc. Les alias, eux, sont bien
+// reaffectes sur l'element : ils suivent la scene, et `pnpm rebrand` les
+// repeint sans rouvrir ce fichier.
+//
+// Le moteur vit dans ./_film.ts : limite de 400 lignes par fichier, et surtout
+// cycle de vie du routeur client (voir l'en-tete de ce module).
+//
+// LA VIDEO VIENT DE PEXELS, licence libre pour l'usage commercial, sans
+// attribution exigee : video Pexels 4863640, une vague vue de dessous, qui roule
+// et se referme, l'eau claire et la lumiere qui traverse la crete. Tournee a
+// Hawaii, a Electric Beach. PHOTOS.md donne la page d'origine. La version
+// precedente etait hebergee par la maison, ce qui faisait dependre la
+// demonstration d'un serveur qui n'est pas celui de l'utilisateur, et ce
+// fichier-la n'etait pas redistribuable.
+//
+// Les trois adresses de video pointent le meme fichier : Pexels n'en publie
+// qu'un seul rendu utile pour ce plan, 1920 par 1080, 9 Mo. En portrait la scene
+// l'agrandit pour couvrir, c'est prevu par le moteur.
+//
+// LES DEUX AFFICHES SONT SERVIES PAR LE SITE, PAS PAR UN TIERS, ET CE SONT SES
+// PROPRES PHOTOS. Demandees a l'hebergeur de la vignette, elles posaient deux
+// temoins tiers : la demonstration plafonnait a 77 en bonnes pratiques pour
+// cette seule raison, et sa plus grande image dependait d'un domaine que le
+// theme ne controle pas. L'affiche est maintenant la photographie de premier
+// ecran du theme, deja dans le depot en 2560 px, et les deux recadrages sont
+// fabriques au build. Regle de la maison : les images d'un site sont SES
+// images, on ne va pas en chercher dehors quand le depot en a. La video reste
+// distante : elle ne se charge qu'au defilement, jamais au premier rendu.
+//
+// Qui installe le theme remplace les trois adresses de video ci-dessous et
+// l'image d'affiche par les siennes : c'est le seul endroit a changer.
+import filmPoster from "@assets/reef-hero-vague.webp";
+import { getImage } from "astro:assets";
+
+import { Icon } from "@components/svg/icons";
+import { Button } from "@components/ui/button";
+import { getSiteRoutes } from "@config/navData.json.ts";
+import { getLocale, useTranslations } from "@i18n";
+
+interface Props {
+  /** Paysage, densite standard. */
+  src?: string;
+  /** Paysage, ecrans a forte densite. */
+  srcHd?: string;
+  /** Portrait, telephones : une video paysage devrait etre agrandie 1,6x pour couvrir. */
+  srcPortrait?: string;
+  poster?: string;
+  posterPortrait?: string;
+  /** Portion de la video utilisee, en secondes. */
+  from?: number;
+  to?: number;
+}
+
+// Les deux recadrages, fabriques au build a partir de la meme source 4K :
+// paysage pour les grands ecrans, portrait pour les telephones, ou une image
+// paysage devrait etre agrandie 1,6 fois pour couvrir.
+const affichePaysage = await getImage({ src: filmPoster, width: 1920, height: 1080, format: "webp" });
+const affichePortrait = await getImage({ src: filmPoster, width: 608, height: 1080, fit: "cover", position: "center", format: "webp" });
+
+const {
+  src = "https://videos.pexels.com/video-files/4863640/4863640-hd_1920_1080_24fps.mp4",
+  srcHd = "https://videos.pexels.com/video-files/4863640/4863640-hd_1920_1080_24fps.mp4",
+  srcPortrait = "https://videos.pexels.com/video-files/4863640/4863640-hd_1920_1080_24fps.mp4",
+  poster = affichePaysage.src,
+  posterPortrait = affichePortrait.src,
+  from = 0,
+  to = 12,
+}: Props = Astro.props;
+
+const locale = getLocale(Astro);
+const t = useTranslations(locale);
+const routes = getSiteRoutes(locale);
+
+const title = t.home.aboutTitle;
+const accent = t.home.aboutAccent;
+const at = title.toLowerCase().indexOf(accent.toLowerCase());
+const before = at >= 0 ? title.slice(0, at) : title;
+const word = at >= 0 ? title.slice(at, at + accent.length) : "";
+const after = at >= 0 ? title.slice(at + accent.length) : "";
+---
+
+<section
+  class="film deep-scene"
+  data-film
+  data-from={from}
+  data-to={to}
+  aria-labelledby="studio-title"
+  data-slot="film-scene"
+>
+  <div class="film__pin">
+    {/* La video est decorative : le texte pose par dessus porte tout le sens,
+        et le decrire deux fois n'aiderait personne. */}
+    <div class="film__media">
+      <video
+        class="film__video"
+        playsinline
+        muted
+        preload="none"
+        disablepictureinpicture
+        aria-hidden="true"
+        data-src={src}
+        data-src-hd={srcHd}
+        data-src-portrait={srcPortrait}
+        data-poster={poster}
+        data-poster-portrait={posterPortrait}></video>
+    </div>
+
+    {/* Voile de lecture. Deux couches : une horizontale qui protege la colonne
+        de texte, une verticale qui rattache la scene au reste de la page. */}
+    <div class="film__veil" aria-hidden="true"></div>
+
+    <div class="film__content container-page">
+      <div class="max-w-2xl">
+        <p
+          class="film__item flex items-center gap-3 text-xs font-medium tracking-[0.18em] text-white/80 uppercase"
+        >
+          <span class="bg-primary inline-block h-px w-8 shrink-0" aria-hidden="true"></span>
+          {t.about.eyebrow}
+        </p>
+
+        <h2 id="studio-title" class="film__item font-display text-display-sm md:text-display-md mt-6 text-white">
+          {
+            word ? (
+              <Fragment>
+                {before}
+                <span class="accent-script">{word}</span>
+                {after}
+              </Fragment>
+            ) : (
+              title
+            )
+          }
+        </h2>
+
+        <p class="film__item measure-wide mt-6 leading-relaxed text-white/85 md:text-lg">
+          {t.home.aboutLede}
+        </p>
+
+        <div class="film__item mt-8 flex flex-wrap gap-3">
+          <Button href={routes.about} variant="primary" size="md">
+            {t.home.aboutCta}
+            <Icon name="arrow-right" size={17} />
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    {/* Le rail dit ou on en est dans la sequence. Sans lui, un lecteur qui
+        s'arrete au milieu ne sait pas s'il reste quelque chose a voir. */}
+    <div class="film__rail" aria-hidden="true"><i></i></div>
+  </div>
+</section>
+
+<style>
+  /* La hauteur EST la duree. Trois hauteurs d'ecran donnent au lecteur de quoi
+     derouler la sequence sans avoir a ramer, et laissent la marge necessaire
+     au garde-fou de cadence (voir le commentaire en tete de fichier). */
+  .film {
+    position: relative;
+    height: 300vh;
+    background: var(--reef-background);
+  }
+
+  .film__pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    background: var(--reef-background);
+  }
+
+  /* inset negatif : la mise a l'echelle ne doit jamais laisser voir un bord. */
+  .film__media {
+    position: absolute;
+    inset: -2%;
+    transform: scale(1.06) translateZ(0);
+    transform-origin: 52% 55%;
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  .film__video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .film__veil {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--reef-background) 90%, transparent) 0%,
+        color-mix(in oklab, var(--reef-background) 64%, transparent) 46%,
+        color-mix(in oklab, var(--reef-background) 14%, transparent) 100%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--reef-background) 46%, transparent) 0%,
+        transparent 26%,
+        transparent 68%,
+        color-mix(in oklab, var(--reef-background) 58%, transparent) 100%
+      );
+  }
+
+  .film__content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .film__rail {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 2px;
+    background: color-mix(in oklab, var(--reef-foreground) 12%, transparent);
+    z-index: 3;
+  }
+
+  .film__rail i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(
+      90deg,
+      var(--reef-primary) 0%,
+      var(--reef-accent) 62%,
+      var(--reef-foreground) 100%
+    );
+    box-shadow: 0 0 0.85em color-mix(in oklab, var(--reef-accent) 70%, transparent);
+  }
+
+  /* Repli. En mouvement reduit ou en economie de donnees, la section cesse
+     d'etre une sequence : elle redevient un bloc normal, haut d'un ecran, avec
+     son image d'attente et son texte. Depuis le 5 septembre 2026 la largeur
+     n'est plus un motif de repli : la sequence defile aussi sur telephone. Aucun morceau de
+     message ne depend de l'animation, c'est la condition pour avoir le droit
+     d'animer. */
+  .film--flat {
+    height: auto;
+    min-height: 100svh;
+  }
+
+  .film--flat .film__pin {
+    position: relative;
+    height: auto;
+    min-height: 100svh;
+  }
+
+  .film--flat .film__media {
+    transform: none;
+    inset: 0;
+  }
+
+  .film--flat .film__rail {
+    display: none;
+  }
+
+  .film--flat .film__content {
+    position: relative;
+    padding-block: 6rem;
+  }
+
+  .film--flat .film__veil {
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--reef-background) 66%, transparent) 0%,
+      color-mix(in oklab, var(--reef-background) 34%, transparent) 42%,
+      color-mix(in oklab, var(--reef-background) 62%, transparent) 100%
+    );
+  }
+
+  /* Sous 1024 px, le voile devient VERTICAL, et cette regle passe APRES celle
+   * du repli : sous cette borne la section est toujours en .film--flat, dont
+   * le selecteur est plus fort. Le degrade horizontal est dense a gauche et
+   * ouvert a droite, ce qui suppose une colonne de texte qui s'arrete au
+   * milieu. Sur telephone le texte prend toute la largeur : sa fin de ligne
+   * tombe dans la partie ouverte, et sur une photographie claire elle devient
+   * illisible. Un degrade vertical, dense derriere toute la bande de texte,
+   * regle le probleme sans toucher au cadrage de la photo. */
+  @media (max-width: 63.99rem) {
+    .film__veil,
+    .film--flat .film__veil {
+      background: linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--reef-background) 82%, transparent) 0%,
+        color-mix(in oklab, var(--reef-background) 90%, transparent) 55%,
+        color-mix(in oklab, var(--reef-background) 72%, transparent) 100%
+      );
+    }
+  }
+
+  /* Les elements de texte partent invisibles UNIQUEMENT quand le script est la
+     pour les relacher. Sans cette classe posee par le script, un lecteur dont
+     le JavaScript a echoue verrait une section vide : l'etat de depart est
+     donc le lisible, et c'est le script qui prend la main. */
+  .film--live .film__item {
+    opacity: 0;
+    will-change: opacity, transform;
+  }
+</style>
+
+<script>
+  import "./_film";
+</script>

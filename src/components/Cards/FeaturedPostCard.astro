@@ -1,0 +1,187 @@
+---
+// src/components/Cards/FeaturedPostCard.astro - le billet a la une : une bande pleine largeur, pas une carte agrandie.
+//
+// Un article a la une qui n'est qu'une carte en plus gros ne met rien en avant.
+// Celui-ci prend toute la largeur, monte le titre a l'echelle d'affichage et
+// s'offre une colonne de respiration a droite (la couverture si elle existe, un
+// specimen typographique sinon). C'est la piece qui doit donner envie de lire
+// avant que le lecteur ait fini de descendre l'ecran.
+//
+// La couverture de secours n'est pas un bouche-trou : c'est ce qui s'affiche
+// quand un billet n'a pas de photo. Elle est composee, avec un halo qui derive
+// dans la couleur du sujet, les deux vagues de la marque et le nom du sujet en
+// capitales espacees le long du bord.
+//
+// L'initiale geante qui tronait au centre a ete retiree. La lettre en
+// filigrane est un tic visuel que le public associe aux pages generees, et le
+// reproche est arrive de l'exterieur. La vague la remplace : le logo de la
+// maison EST une vague, donc la couverture porte la signature de la marque au
+// lieu d'un motif que n'importe quel theme pourrait poser.
+//
+// La version precedente n'avait ni halo ni contraste : sur fond sombre, un gris
+// a 8% sur un gris a 10% ne dessine rien, et le panneau lisait comme un trou
+// dans la carte. C'etait la faute la plus visible de la page d'accueil.
+import { Icon } from "@components/svg/icons";
+import { Avatar } from "@components/ui/avatar";
+import { Button } from "@components/ui/button";
+import { getSiteRoutes } from "@config/navData.json.ts";
+import { fmt, formatDate, useTranslations, type Locale } from "@i18n";
+import type { ResolvedPost } from "@js/posts";
+import { Image } from "astro:assets";
+import { topicTone } from "./topicTone";
+
+// PLUS DE PASTILLE "A LA UNE", ET PLUS DE PROP POUR LA PORTER.
+//
+// Une etiquette pleine, arrondie, posee en haut a gauche pour annoncer que ce
+// billet est le billet mis en avant : elle ne disait rien que le surtitre de
+// la section, six pixels au-dessus, ne dise deja ("La note du mois"), et elle
+// poussait le titre vers le bas. C'est la regle 12 de la maison, posee le
+// 5 septembre 2026 : ce qui n'est ni cliquable ni saisissable ne prend pas de
+// pastille, et une pastille qui repete son voisin ne se degraisse pas, elle
+// s'enleve. Le chip de sujet reste : lui est un vrai lien.
+type Props = {
+  entry: ResolvedPost;
+  locale: Locale;
+  as?: "h2" | "h3";
+  class?: string;
+};
+
+const { entry, locale, as: Tag = "h2", class: className }: Props = Astro.props;
+const { post, author, topic, slug, topicSlug, minutes } = entry;
+
+const t = useTranslations(locale);
+const routes = getSiteRoutes(locale);
+const href = `${routes.posts}${slug}/`;
+const topicHref = `${routes.topics}${topicSlug}/`;
+const tone = topicTone[topic.data.accent];
+const readLabel = minutes === 1 ? t.post.minReadOne : fmt(t.post.minRead, { n: minutes });
+---
+
+<article
+  class:list={[
+    "group border-border bg-card rounded-panel relative overflow-hidden border",
+    "shadow-float transition-[box-shadow,border-color] duration-300",
+    "hover:shadow-lift hover:border-foreground/20",
+    className,
+  ]}
+  data-slot="featured-post-card"
+>
+  <div class="grid items-stretch lg:grid-cols-12">
+    <div class="flex flex-col gap-5 p-7 sm:p-10 lg:col-span-7 lg:p-12">
+      <p class="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <a
+          href={topicHref}
+          class:list={["font-sans rounded-pill relative z-10 px-2.5 py-1 text-xs font-medium", tone.chip]}
+        >
+          {topic.data.name}
+        </a>
+        <span class="text-muted-foreground font-sans text-xs">
+          <time datetime={post.data.pubDate.toISOString()}>
+            {formatDate(post.data.pubDate, locale)}
+          </time>
+        </span>
+      </p>
+
+      <Tag class="font-display text-display-sm md:text-display-md text-foreground max-w-2xl">
+        <a href={href} class="after:absolute after:inset-0 after:content-['']">
+          {post.data.title}
+        </a>
+      </Tag>
+
+      <p class="text-muted-foreground measure-prose text-lg leading-relaxed">
+        {post.data.description}
+      </p>
+
+      <div class="mt-2 flex flex-wrap items-center gap-4">
+        <span class="flex items-center gap-2.5">
+          <Avatar name={author.data.name} src={author.data.avatar?.src} size="md" alt="" />
+          <span class="flex flex-col">
+            <span class="text-foreground font-sans text-sm font-medium">{author.data.name}</span>
+            <span class="text-muted-foreground font-sans text-xs">{readLabel}</span>
+          </span>
+        </span>
+        {/* Le bouton double le lien de carte : il ne sert qu'a annoncer l'action
+            a l'oeil. tabindex -1 et aria-hidden evitent de le faire annoncer
+            deux fois au clavier et au lecteur d'ecran. */}
+        <Button
+          href={href}
+          variant="outline"
+          size="md"
+          class="relative z-10 ml-auto hidden sm:inline-flex"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          {t.common.readPost}
+          <Icon name="arrow-right" size={17} />
+        </Button>
+      </div>
+    </div>
+
+    <div class="lg:col-span-5">
+      {
+        post.data.cover ? (
+          <Image
+            src={post.data.cover}
+            alt={post.data.coverAlt ?? ""}
+            widths={[640, 1024]}
+            sizes="(min-width: 1024px) 40vw, 100vw"
+            class="h-full min-h-56 w-full object-cover"
+            loading="eager"
+            decoding="async"
+          />
+        ) : (
+          <div
+            class:list={[
+              "deep-scene border-border relative flex h-full min-h-64 items-center justify-center overflow-hidden",
+              "border-t lg:border-t-0 lg:border-l",
+            ]}
+            aria-hidden="true"
+          >
+            {/* PLUS DE DISQUE FLOUTE. Une teinte de 26rem, floutee au maximum,
+                debordait de ce coin. Elle avait d'abord derive, puis on l'avait
+                immobilisee, et elle restait ce qu'elle etait : une lueur. Celle
+                du premier sujet etait de surcroit CORAIL alors que tout le
+                reste de ce ton, la pastille, la puce et le filet, est en
+                primaire : la couverture ne montrait donc meme pas la couleur du
+                sujet qu'elle illustrait.
+
+                Ce qui distingue les couvertures reste, et se lit mieux : le
+                filet de deux pixels en haut, a la couleur du sujet, et la vague
+                dessinee en bas, a la meme couleur. Un trait et un dessin
+                nomment un sujet ; une nappe floue ne nomme rien. */}
+            <span class:list={["absolute inset-x-0 top-0 h-0.5", tone.rule]}></span>
+
+            <svg
+              class:list={["absolute inset-x-0 bottom-0 w-full opacity-40", tone.ghost]}
+              viewBox="0 0 200 60"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M0 34c20-16 40-16 60 0s40 16 60 0 40-16 60 0 40 16 60 0"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+              />
+              <path
+                d="M0 48c20-12 40-12 60 0s40 12 60 0 40-12 60 0 40 12 60 0"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+
+            {/* Le nom du sujet, a la verticale contre le bord gauche du panneau.
+                Il transforme le panneau en couverture de rubrique au lieu d'un
+                aplat decoratif, et il ne vole pas une ligne au titre. */}
+            <span
+              class="text-muted-foreground absolute top-6 left-5 text-[0.7rem] font-medium tracking-[0.32em] uppercase [writing-mode:vertical-rl]"
+            >
+              {topic.data.name}
+            </span>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</article>

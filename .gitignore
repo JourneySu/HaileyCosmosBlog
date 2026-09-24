@@ -1,0 +1,38 @@
+# .gitignore - keeps installs, build output, generated caches and secrets out of the repository.
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Astro generated types and content cache
+.astro/
+
+# Cloudflare Wrangler local state
+.wrangler/
+
+# Variables d'environnement locales. Le theme n'en demande aucune pour
+# construire ni pour se deployer ; ce fichier reste ignore par principe.
+.env
+
+# Les cartes Open Graph de public/og/ sont VERSIONNEES : `pnpm og` ne tourne pas
+# au build, un clone doit donc les trouver deja la. Les regenerer apres un
+# rebrand, puis les commiter.
+
+# Photographies de la demo : rapatriees par `pnpm covers`, refabriquees au build.
+src/assets/covers/
+src/assets/*.webp
+
+# Outillage local des autres assistants de code : jamais publie.
+# CLAUDE.md et .claude/settings.json, eux, font partie du produit : ils
+# disent a l'agent de l'acheteur ou sont les regles de la maison et ce
+# qu'il a le droit de lancer. Les conventions restent versionnees dans
+# docs/conventions/.
+.cursor/
+.windsurf/
+
+# Systeme et journaux.
+.DS_Store
+Thumbs.db
+*.log
