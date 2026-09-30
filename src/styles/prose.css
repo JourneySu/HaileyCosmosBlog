@@ -16,6 +16,12 @@
  * enfant gagne sans se battre. C'est ce qui rend la colonne editable.
  * ------------------------------------------------------------------------- */
 
+/* Le theme des callouts Obsidian (rehype-callouts), importe DANS le meme
+ * calque que le reste de ce fichier : sans layer(), un @import simple prend
+ * la priorite la plus haute de la cascade et un utilitaire Tailwind pose sur
+ * un callout ne pourrait plus jamais le battre. */
+@import "rehype-callouts/theme/obsidian" layer(components);
+
 @layer components {
   .prose {
     /* Trois variables locales pilotent le rythme. Les surcharger sur un parent

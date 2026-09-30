@@ -2,7 +2,7 @@
 //
 // C'est la tranche la plus importante du theme. Reef ne vend ni un tunnel de
 // conversion ni un tableau de bord : il vend huit minutes de lecture propre.
-// Les libelles qui bordent le texte (dates, temps de lecture, sommaire, partage,
+// Les libelles qui bordent le texte (dates, temps de lecture, sommaire,
 // article suivant) sont lus a chaque visite, donc ils meritent d'etre ecrits.
 //
 // Trois sections : `post` (la page d'article), `archive` (les listes et leurs
@@ -24,13 +24,6 @@ export const zhReading = {
     tocLabel: "目錄",
     topicLabel: "主題",
     tagsLabel: "標籤",
-    share: "分享",
-    shareOn: "分享到 {network}",
-    /** Les deux seules destinations de partage du theme : une ancre mailto: et
-     *  une ancre d'intention. Aucun bouton officiel, donc aucun script tiers et
-     *  aucun cookie pose a des lecteurs qui ne partagent rien. */
-    networkEmail: "電子郵件",
-    networkX: "X",
     copyLink: "複製連結",
     linkCopied: "已複製連結",
     previousPost: "上一篇",

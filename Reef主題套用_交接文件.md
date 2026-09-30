@@ -113,17 +113,27 @@ src/
 ### D. 清除範本內容（確認完整性，2026-09-24 確認狀態）
 
 - [x] Legal/Privacy 頁面：已直接整個刪除頁面（`legal.astro`／`privacy.astro`／`terms.astro`，連同 RSS 一起，見對話記錄），不是保留範本文字，是頁面本身已不存在、不可連結
-- [ ] `src/data/posts/`、`src/data/authors/`、`src/data/topics/` 範本內容清查結果（2026-09-24）：
-  - `src/data/posts/zh/` 4 篇文章仍是原版英文範本（網頁開發／接案主題，跟部落格定位無關）
-  - `src/data/topics/zh/` 5 個主題仍是原版英文範本分類（craft／design／performance／studio／typography）
+- [ ] `src/data/posts/`、`src/data/authors/`、`src/data/topics/` 範本內容清查結果，**最新狀態（2026-09-24，E 項完成後）**：
+  - `src/data/posts/zh/` 4 篇文章仍是原版英文範本（網頁開發／接案主題，跟部落格定位無關），尚未刪除／替換
+  - `src/data/topics/zh/` 目前**共 8 個檔案，新舊並存**：
+    - 舊範本 5 個，尚未清除：`craft.json`／`design.json`／`performance.json`／`studio.json`／`typography.json`
+    - 真實分類 3 個，E-3 項已建立並確認可用：`reduce-plastic.json`（減塑）／`reading.json`（閱讀）／`personal.json`（個人）
   - `src/data/authors/zh/mara-lindqvist.json`：`name` 已改「Hailey」，但 `role`（英文「Founder and web developer」）與 `bio`（只有「閱讀、生活記錄」四字，未寫完整）都還沒處理
-  - **決定**：這些內容先保留原樣不動，改動順序併入「F. 內容遷移」，等實際內容遷移時一次處理，不在 D 階段單獨處理
+  - **決定**：舊範本 5 個 topic、4 篇範本文章、作者 role/bio，這些改動順序併入「F. 內容遷移」，等實際內容遷移時一次處理，不在 D 階段單獨處理
 
-### E. 搬遷先前已驗證的 Obsidian 自動化功能（Wikilink / Callout / 圖片同步）
+### E. 搬遷先前已驗證的 Obsidian 自動化功能（Wikilink / Callout / 圖片同步）✅ 全部完成（2026-09-24）
 
 以下三項功能已在舊專案 `my-thinking` 驗證成功，需要「搬」到 Reef 專案，運作原則不變（唯讀、build時於記憶體中轉換，不寫回vault）：
 
-1. **Wikilink**：
+> **日常寫作規範另見 `Obsidian寫作SOP.md`**（2026-09-24 建立）：frontmatter 必填
+> 欄位、主題 slug 對照表、wikilink／callout 語法，都記在那份文件，這裡只記錄
+> 搬遷過程本身。
+
+1. **Wikilink**：✅ 完成（2026-09-24）
+   - 已確認 Astro 7 預設的 Satteri 引擎會忽略 `markdown.remarkPlugins`（已棄用），改用 `processor: unified({ remarkPlugins: [...] })` 包起來，套件為此額外裝了 `@astrojs/markdown-remark`
+   - `urlResolver` 路徑在動手前已重新查證 Reef 實際路由（`src/pages/[...locale]/blog/[id].astro`），確認 `/blog/<slug>/` 跟舊專案一致，程式碼照搬未修改
+   - 設定寫在 `astro.config.mjs`；`[[slug]]` 與 `![[embed]]` 皆已用測試文章驗證轉換正確，測試內容驗證後已清除
+   - `THIRD-PARTY.md` 已補上三個新套件的記錄
    - 套件：`@flowershow/remark-wiki-link`，**務必安裝 3.3.1 版本**（4.0.0版本有Vite無法解析的打包問題）
    ```bash
    npm install @flowershow/remark-wiki-link@3.3.1
@@ -140,7 +150,10 @@ src/
    ```
    - **注意**：urlResolver 收到的是物件 `{ filePath, heading, isEmbed }`，不是字串，需解構取值，否則會得到 `[object Object]` 導致404
 
-2. **Callout**：
+2. **Callout**：✅ 完成（2026-09-24）
+   - `rehypePlugins: [rehypeCallouts]` 加進同一個 `astro.config.mjs` 的 `processor: unified({...})` 區塊（跟 Wikilink 共用同一個處理器設定，不用另外切換引擎）
+   - Reef 沒有 `BlogPost.astro` 這種檔案，文章排版走 `.prose`（`src/styles/prose.css`），佈景主題用 `@import "rehype-callouts/theme/obsidian" layer(components);` 接進去，並包進 `layer(components)`，避免搶贏 Tailwind 工具類的優先權
+   - 已用測試文章驗證：`> [!note]` 語法正確產生 `data-callout="note"` 的區塊與圖示，佈景主題 CSS 也確認有編譯進頁面，測試內容驗證後已清除
    - 套件：`rehype-callouts`
    ```bash
    npm install rehype-callouts
@@ -150,18 +163,27 @@ src/
    import 'rehype-callouts/theme/obsidian';
    ```
 
-3. **圖片同步腳本**：
-   - 舊腳本 `scripts/sync-content.js` 邏輯：讀取vault的 `21_Public創作` 文章、掃描`![[圖片]]`語法、只複製有被引用到的圖片到Astro專案
-   - **需調整路徑**：Reef的文章存放在 `src/data/posts/`（content collection格式），而非舊專案的 `src/content/blog/`，且frontmatter欄位需比對Reef的 `content.config.ts` zod schema（可能需要額外欄位如topic關聯、author關聯）
-   - 圖片存放位置沿用 `public/images/` 或依Reef慣例調整
+3. **圖片同步腳本**：✅ 完成（2026-09-24），`scripts/sync-content.mjs`，指令 `pnpm sync-content`
+   - 沿用舊腳本 `scripts/sync-content.js` 的核心原則（唯讀 vault、只複製、不寫回不刪除），但**新增了 frontmatter 解析與驗證**，因為 Reef 的 `author`／`topic` 是必填的 reference 欄位，舊腳本整篇文字原封不動複製的做法在 Reef 會直接讓 build 失敗
+   - 輸出目的地改成 `src/data/posts/zh/`（Reef 的 content collection 路徑），圖片維持沿用 `public/images/`
+   - `author` 自動補上 `zh/mara-lindqvist`（目前唯一作者）；`topic` 要求 vault frontmatter 手動填 bare slug（見 `Obsidian寫作SOP.md` 的對照表），腳本轉換成 `zh/<slug>` 並對照 `src/data/topics/zh/*.json` 動態驗證是否存在
+   - **驗證失敗即整篇跳過，不會讓其他文章或整個網站的 build 失敗**：`title`／`description`／`pubDate`／`topic` 任一缺漏，或 `topic` 拼字不在有效清單內，該篇文章就不會被複製，終端機印出warning 說明原因；其餘通過驗證的文章不受影響
+   - 這次順手在 `src/data/topics/zh/` 新增了三個真實分類（`reduce-plastic`／`reading`／`personal`，對照表見 `Obsidian寫作SOP.md`），供 vault 筆記引用；舊的 5 個範本分類尚未清除（併入 D／F 項處理）
+   - 用暫存的假 vault 目錄測過正向與負向路徑（缺 topic 跳過、有效 topic 正確同步＋補欄位＋複製圖片），沒有寫入使用者真實 vault 的任何內容，測試完的檔案也已清除
+   - `package.json` 新增 `"sync-content": "node scripts/sync-content.mjs"`
+   - **2026-09-24 延伸：封面圖也改成 vault 端自動化**（原本設計是「同步腳本不處理，手動補」，使用者反饋封面圖是必要功能後重新設計）：vault frontmatter 新增 `cover`（`99_assets` 裡的檔名）／`coverAlt`（選填）兩個欄位，腳本自動複製圖片到 `src/assets/covers/` 並在輸出 frontmatter 產生正確的 `../../../assets/covers/...` 相對路徑；封面圖檔名對照不到就印警告但整篇文章照常同步，不會被跳過。用暫存假 vault 測過三種情況（有效封面圖、完全不填、填了但檔案不存在），並額外用一張真實圖片完整跑過 `pnpm build`，確認 Astro 圖片最佳化流程（`srcset` 響應式尺寸、`alt` 正確帶入）end-to-end 正常，測試檔案已清除
+   - **已知限制（已記錄進 `Obsidian寫作SOP.md`）**：封面圖沿用「只複製不刪除」原則，換封面圖時舊圖片檔案不會自動從 `src/assets/covers/` 清掉，會變成孤兒檔案，需要手動清；跟文章刪除的已知缺口是同一類限制
 
 ### F. 內容遷移
 
-- [ ] 把先前測試用的 `hello-world`、`second-post` 文章，轉換成符合Reef的frontmatter格式（需先查看`content.config.ts`確認必填欄位）
-- [ ] Topics設定：對應使用者原本規劃的分類（減塑、閱讀、個人）
-- [ ] （併入自 D 項，2026-09-24）處理 `src/data/posts/zh/` 現存 4 篇範本文章：刪除或替換成真實內容
-- [ ] （併入自 D 項，2026-09-24）處理 `src/data/topics/zh/` 現存 5 個範本主題：換成真實分類（減塑、閱讀、個人，或使用者屆時決定的分類）
-- [ ] （併入自 D 項，2026-09-24）補完 `src/data/authors/zh/mara-lindqvist.json` 的 `role`／`bio` 欄位內容
+- [ ] vault 裡 `21_Public創作` 目前 3 篇筆記的處理狀態（2026-09-24 確認，尚未執行）：
+  - `test1.md`：測試殘留檔，**不處理**，不會同步
+  - `hello-world.md`：**要正式同步**，分類定案為 `topic: personal`，需使用者在 Obsidian 裡手動加上這行 frontmatter，再跑 `pnpm sync-content`
+  - `second-post.md`：**要正式同步**（內文的 Lorem Ipsum 是刻意用來測排版，非殘留檔），分類定案為 `topic: personal`，同樣需使用者手動在 Obsidian 加上 frontmatter 後執行同步
+- [x] Topics設定：**2026-09-29 定案並完成**，最終只保留閱讀、個人兩個分類，見 `src/data/topics/zh/{reading,personal}.json`。原本 E-3 項一併建立的「減塑」分類（`reduce-plastic.json`）也已依使用者指示移除，之後有需要再自行新增
+- [x] （併入自 D 項）處理 `src/data/posts/zh/` 範本文章：**2026-09-29 完成**，4 篇原始英文範本、加上期間使用者自行測試同步的「新版面測試1」，全部確認是測試性質後一併刪除，`src/data/posts/zh/` 目前是空資料夾，等 F 項第一條的 `hello-world`／`second-post` 正式同步後才會有內容
+- [x] （併入自 D 項）處理 `src/data/topics/zh/` 範本主題：**2026-09-29 完成**，5 個舊範本（craft／design／performance／studio／typography）全部刪除，見上面 Topics 設定一條
+- [ ] （併入自 D 項，2026-09-24）補完 `src/data/authors/zh/mara-lindqvist.json` 的 `role`／`bio` 欄位內容——**2026-09-29 更新**：使用者已自行把 `role` 改成空字串（確認 schema 允許空字串，不影響 build），`bio`（"閱讀、生活記錄"）目前仍是初版，尚未確認是否為最終版本
 
 ### G. 最終部署決策與上線
 
@@ -169,12 +191,21 @@ src/
 - [ ] 決定：直接取代 my-thinking 現有內容，或視為新專案重新接上 GitHub + Cloudflare
 - [ ] 正式部署，實測正式網站效果
 
+## 未來優化構想（非本次搬遷範圍，日後可考慮）
+
+- [ ] **文章底部「複製連結」分享功能**（2026-09-29 提出）：原本 `PostFooter.astro` 的「分享」區塊（電子郵件、X 兩個按鈕）已整段移除（見對話紀錄），使用者認為讀者直接用瀏覽器網址列複製分享即可。但字典裡 `src/i18n/ui/zh/reading.ts` 的 `post.copyLink`（"複製連結"）／`post.linkCopied`（"已複製連結"）這兩個翻譯字串**刻意保留未刪**——確認過整個專案目前沒有任何程式碼引用它們，是 Reef 主題原本就預留、但從未真正接上功能的死字串。使用者之後如果想在文章底部（原「分享」按鈕的位置）加回一顆「複製連結」按鈕，這兩個字串已經現成可用，只需要：
+  1. 在 `PostFooter.astro` 加回一個按鈕（可放在標籤欄旁邊，恢復先前兩欄並排的版面，或找其他合適位置）
+  2. 寫一小段用 `navigator.clipboard.writeText()` 複製目前網址的原生 script（不需要框架，符合 AGENTS.md「平台優先」的排梯規則），點擊後把按鈕文字從 `copyLink` 暫時換成 `linkCopied` 提示成功
+  3. 這會是本主題少數幾個帶 `<script>` 的元件之一，記得照 `docs/conventions/motion.md`／`astro.md` 的規範處理 view transitions 重新初始化（`astro:page-load` + `data-*-ready` 防重複綁定）
+
 ## 已知技術陷阱記錄（避免重複踩坑）
 
 1. **Astro 7 Sätteri引擎**：預設markdown處理器更換，remark/rehype外掛需搭配 `@astrojs/markdown-remark` 與 `processor: unified({...})` 寫法，不能用舊版平行 `remarkPlugins`/`rehypePlugins` 寫法
 2. **套件版本**：`@flowershow/remark-wiki-link` 務必用3.3.1，4.0.0版本有打包問題無法被Vite解析
 3. **urlResolver參數是物件**：`{ filePath, heading, isEmbed }`，需解構取用，直接塞進字串模板會得到`[object Object]`
 4. **Astro內容快取**：修改設定檔後，若文章內容本身沒變動，可能沿用快取結果。排查順序：先改動文章內容觸發重新處理 → 仍無效則清除 `.astro` 快取資料夾（PowerShell用 `Remove-Item -Recurse -Force .astro`）→ 重新 `npm run dev`/`pnpm dev`
+   - **2026-09-29 補充，真正持久化的內容快取在別的地方**：專案根目錄的 `.astro/` 資料夾只是「型別產生快取」，不是內容資料本身。真正記住每篇文章/主題/作者資料的持久化儲存是 `node_modules/.astro/data-store.json`。實測案例：刪除多篇文章跟主題檔案後，即使清空根目錄 `.astro/` 資料夾重跑 `pnpm check`，仍會報錯說「文章引用了已刪除的主題」——這些是資料層快取記住的已刪除舊資料，不是程式碼或設定寫錯。真正解法是額外刪除 `node_modules/.astro/data-store.json`（PowerShell：`Remove-Item -Force node_modules\.astro\data-store.json`）後再重跑，兩個快取都要清乾淨才會真正重新掃描 `src/data/` 底下的實際檔案
+   - 另外要提醒：這個資料層快取只有 `pnpm check`／`pnpm build`（一次性指令）會重新讀取。如果 `pnpm dev` 開發伺服器本來就在背景執行，就算清了快取，該伺服器也不會自動重新掃描，必須手動停掉（Ctrl+C）再重開，才會反映最新的檔案異動（同一類「dev server 沒跟上內容變化」的狀況）
 5. **Content Collection資料互相依賴**：Reef的posts會引用authors、topics的id，刪除被引用中的資料會導致build報錯（`Auteur inconnu "..."`這類錯誤），修改前建議先確認引用關係，或採用「先清空引用方，再刪除被引用方」的順序
 6. **Windows PowerShell語法差異**：不支援CMD語法如 `rmdir /s /q`，需用 `Remove-Item -Recurse -Force`
 

@@ -105,7 +105,12 @@ const iso = (date: Date): string => date.toISOString();
           <span class="flex flex-col">
             <span class="font-sans text-sm">
               <span class="text-muted-foreground">{t.post.writtenBy} </span>
-              <span class="text-foreground font-medium">{author.data.name}</span>
+              <a
+                href={routes.about}
+                class="text-foreground decoration-primary/50 font-medium underline-offset-4 hover:underline"
+              >
+                {author.data.name}
+              </a>
             </span>
             <span class="text-muted-foreground font-sans text-xs">{author.data.role}</span>
           </span>

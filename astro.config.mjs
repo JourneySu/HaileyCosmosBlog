@@ -1,10 +1,13 @@
 // @ts-check
+import { unified } from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
+import wikiLinkPlugin from "@flowershow/remark-wiki-link";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import rehypeCallouts from "rehype-callouts";
 
 const DIST = fileURLToPath(new URL("./dist/", import.meta.url));
 
@@ -72,6 +75,32 @@ export default defineConfig({
   ],
 
   markdown: {
+    // Astro 7 rend par defaut avec Satteri, son pipeline natif, qui ignore
+    // markdown.remarkPlugins/rehypePlugins (options depreciees). Pour garder
+    // remark-wiki-link et rehype-callouts, il faut repasser par l'ancien
+    // pipeline unified()/remark explicitement.
+    processor: unified({
+      remarkPlugins: [
+        [
+          wikiLinkPlugin,
+          {
+            // [[slug]] -> /blog/slug/, ![[slug]] -> /images/slug (voir wiki
+            // Obsidian : le vault reference les billets par leur nom de
+            // fichier anglais, pas par leur titre chinois affiche).
+            /** @type {import("@flowershow/remark-wiki-link").Options["urlResolver"]} */
+            urlResolver: ({ filePath, isEmbed }) => {
+              if (isEmbed) {
+                return `/images/${filePath}`;
+              }
+              return `/blog/${filePath}/`;
+            },
+          },
+        ],
+      ],
+      // Les callouts Obsidian ("> [!note]", etc.) : le theme visuel est
+      // importe a part, dans src/styles/prose.css.
+      rehypePlugins: [rehypeCallouts],
+    }),
     shikiConfig: {
       // Deux themes, commutes par la classe .dark : un bloc de code qui reste
       // clair sur une page sombre est la premiere chose qu'on remarque, et la

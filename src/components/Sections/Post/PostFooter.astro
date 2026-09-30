@@ -1,28 +1,19 @@
 ---
-// src/components/Sections/Post/PostFooter.astro - pied d'article : etiquettes, partage sans mouchard, signature de l'auteur et navigation entre billets.
-//
-// Le partage tient en deux liens et zero script. Les boutons officiels des
-// reseaux sont des iframes qui chargent 40 ko et posent un cookie a chaque
-// affichage, y compris quand personne ne clique : un theme de blog qui les
-// embarque fait payer a tous ses lecteurs le partage de quelques-uns. Une
-// ancre mailto: et une ancre d'intention font le meme travail, hors ligne
-// comprise, et ne suivent personne.
+// src/components/Sections/Post/PostFooter.astro - pied d'article : etiquettes, signature de l'auteur et navigation entre billets.
 import { Icon } from "@components/svg/icons";
 import { Avatar } from "@components/ui/avatar";
 import { getSiteRoutes } from "@config/navData.json.ts";
-import { fmt, getLocale, useTranslations } from "@i18n";
+import { getLocale, useTranslations } from "@i18n";
 import { getResolvedPosts } from "@js/posts";
 import type { CollectionEntry } from "astro:content";
 
 type Props = {
   post: CollectionEntry<"posts">;
   author: CollectionEntry<"authors">;
-  /** URL absolue et canonique du billet, deja construite par la page. */
-  url: string;
   class?: string;
 };
 
-const { post, author, url, class: className } = Astro.props;
+const { post, author, class: className } = Astro.props;
 
 const locale = getLocale(Astro);
 const t = useTranslations(locale);
@@ -38,11 +29,6 @@ const index = published.findIndex((entry) => entry.post.id === post.id);
 const newer = index > 0 ? published[index - 1] : undefined;
 const older = index >= 0 ? published[index + 1] : undefined;
 
-// --- Partage ---------------------------------------------------------------
-const title = post.data.title;
-const mailHref = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${title}\n\n${url}`)}`;
-const xHref = `https://x.com/intent/post?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
-
 const eyebrow =
   "font-sans text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase";
 const chip =
@@ -52,60 +38,26 @@ const chip =
 <footer class:list={["pb-16 md:pb-20", className]} data-slot="post-footer">
   <div class="container-page">
     <div class="measure-prose mx-auto flex flex-col gap-10">
-      {/* Etiquettes et partage sur la meme ligne : ce sont les deux gestes de
-          fin de lecture, et ils meritent le meme rang. */}
-      <div
-        class="border-border flex flex-col gap-6 border-t pt-8 sm:flex-row sm:items-start sm:justify-between"
-      >
-        {
-          post.data.tags.length > 0 && (
-            <div class="flex flex-col gap-3">
-              <h2 class={eyebrow}>{t.post.tagsLabel}</h2>
-              {/* Les etiquettes menent a la recherche et non a une archive par
-                  etiquette : la recherche du theme couvre deja titres, chapeaux,
-                  sujets et etiquettes, et elle existe dans la table des routes.
-                  Une page par etiquette ferait cent routes pour trois clics. */}
-              <ul class="flex flex-wrap gap-2">
-                {post.data.tags.map((tag) => (
-                  <li>
-                    <a class={chip} href={`${routes.search}?q=${encodeURIComponent(tag)}`}>
-                      {tag}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )
-        }
-
-        <div class="flex shrink-0 flex-col gap-3 sm:items-end">
-          <h2 class={eyebrow}>{t.post.share}</h2>
-          <ul class="flex flex-wrap gap-2">
-            <li>
-              <a
-                class={chip}
-                href={mailHref}
-                aria-label={fmt(t.post.shareOn, { network: t.post.networkEmail })}
-              >
-                <Icon name="mail" size={14} />
-                {t.post.networkEmail}
-              </a>
-            </li>
-            <li>
-              <a
-                class={chip}
-                href={xHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${fmt(t.post.shareOn, { network: t.post.networkX })} (${t.common.newTab})`}
-              >
-                <Icon name="external-link" size={14} />
-                {t.post.networkX}
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
+      {
+        post.data.tags.length > 0 && (
+          <div class="border-border flex flex-col gap-3 border-t pt-8">
+            <h2 class={eyebrow}>{t.post.tagsLabel}</h2>
+            {/* Les etiquettes menent a la recherche et non a une archive par
+                etiquette : la recherche du theme couvre deja titres, chapeaux,
+                sujets et etiquettes, et elle existe dans la table des routes.
+                Une page par etiquette ferait cent routes pour trois clics. */}
+            <ul class="flex flex-wrap gap-2">
+              {post.data.tags.map((tag) => (
+                <li>
+                  <a class={chip} href={`${routes.search}?q=${encodeURIComponent(tag)}`}>
+                    {tag}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
 
       {/* La signature. Une biographie en fin d'article ne decore pas : elle
           repond a la question que le lecteur se pose une fois convaincu, qui
@@ -118,9 +70,12 @@ const chip =
 
           <div class="flex min-w-0 flex-col gap-2">
             <p class="flex flex-wrap items-baseline gap-x-3">
-              <span class="font-display text-foreground text-lg font-semibold tracking-tight">
+              <a
+                href={routes.about}
+                class="font-display text-foreground text-lg font-semibold tracking-tight hover:underline"
+              >
                 {author.data.name}
-              </span>
+              </a>
               <span class="text-muted-foreground font-sans text-sm">{author.data.role}</span>
             </p>
 

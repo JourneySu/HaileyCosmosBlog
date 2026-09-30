@@ -35,7 +35,7 @@ export const zhChrome = {
   // aligne six colonnes copie un SaaS et sert d'egout a liens morts.
   footer: {
     tagline:
-      "Hailey Notes 是一個個人的生活筆記本。記錄閱讀、生活靈感，以及關於生命意義的一些隨想。",
+      "Hailey Cosmos 是一個個人的生活筆記本。記錄閱讀、生活靈感，以及關於生命意義的一些隨想。",
     colRead: "閱讀",
     colStudio: "本站",
     sitemap: "網站地圖",

@@ -12,11 +12,11 @@
 export const zhPages = {
   // --- Accueil -------------------------------------------------------------
   home: {
-    metaTitle: "Hailey Cosmos，迴圈之外的生活筆記",
+    metaTitle: "Hailey Cosmos，迴圈外的海莉",
     metaDescription:
       "一個離開日復一日的迴圈後，重新尋找生命意義的地方。閱讀、思考、書寫，記錄我一步步療癒自己、找回生活重量的過程。",
     eyebrow: "Hailey Cosmos",
-    heroTitle: "Outside the Loop 迴圈之外的筆記",
+    heroTitle: "Outside the Loop 迴圈外的海莉",
     heroAccent: "Loop",
     heroLede: "寫給自己，寫給被困在生活迴圈裡的靈魂們。閱讀、思考、書寫，記錄我一步步療癒自己、找回生活重量的過程。",
     heroPrimary: "開始閱讀",
@@ -30,7 +30,7 @@ export const zhPages = {
     latestAccent: "最新",
     latestLede: "最新的文章，由新到舊排列。更早的都收在文章庫。",
     latestCta: "瀏覽所有文章",
-    topicsTitle: "我們持續書寫的五個主題",
+    topicsTitle: "持續書寫的幾個主題",
     topicsAccent: "主題",
     topicsLede: "每篇文章只歸屬一個主題，讓你能專注讀完一條脈絡，不必穿越其他內容。",
     authorsTitle: "這裡是誰在寫",
@@ -51,7 +51,7 @@ export const zhPages = {
     eyebrow: "關於",
     title: "一個練習慢慢療癒自己的人",
     accent: "慢慢療癒",
-    lede: "曾經我也活在日復一日的迴圈裡，說不出哪裡不對勁，卻感覺不到一絲意義。這裡記下我一路尋找答案、慢慢把自己接回來的過程，如果你也在同樣的路上，希望我們能在這裡相遇。",
+    lede: "我是海莉，我曾活在日復一日的迴圈裡，說不出哪裡不對勁，卻感覺不到一絲意義。這裡記下我一路尋找答案、慢慢把自己接回來的過程，現在也仍在路上，如果你也在同樣的路上，希望我們能在這裡相遇。",
     storyTitle: "這個空間是怎麼開始的",
     storyAccent: "開始的",
     storyParagraphs: [

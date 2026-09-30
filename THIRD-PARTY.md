@@ -93,6 +93,9 @@ licenses. Versions are the ones resolved in pnpm-lock.yaml at the date above.
 | tailwind-merge | MIT | Class merging inside tv |
 | @fontsource-variable/space-grotesk | OFL-1.1 | Space Grotesk files |
 | @fontsource-variable/instrument-sans | OFL-1.1 | Instrument Sans files |
+| @astrojs/markdown-remark | MIT | Restores the remark/rehype `unified()` markdown processor (Astro 7 defaults to Satteri, which ignores remark/rehype plugins), so the two plugins below can run |
+| @flowershow/remark-wiki-link | MIT | Obsidian-style `[[wikilink]]` and `![[embed]]` syntax in post Markdown, resolved to `/blog/<slug>/` and `/images/<file>` at build time. Pinned to 3.3.1: 4.0.0 has a packaging issue Vite cannot resolve |
+| rehype-callouts | MIT | Obsidian-style callout blocks (`> [!note]`, etc.) in post Markdown |
 
 There is no React, no animation library and no WebGL dependency in Reef. The
 whole theme is .astro, and every effect on the page is CSS.
