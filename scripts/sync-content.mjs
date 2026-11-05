@@ -1,10 +1,10 @@
-// scripts/sync-content.mjs - 同步 Obsidian vault 的文章到 Reef 專案，唯讀 vault，只複製不刪除不寫回。
+// scripts/sync-content.mjs - 同步 Obsidian vault 的文章到 haileyCosmosBlog 專案，唯讀 vault，只複製不刪除不寫回。
 //
-// 運作原則（照搬舊專案 my-thinking 的 scripts/sync-content.js 驗證過的邏輯）：
+// 運作原則：
 // 只讀取 vault，絕不修改、絕不刪除 vault 裡的任何檔案。所有欄位轉換（補
-// author、轉換 topic 前綴、驗證）都只發生在寫進 Reef 專案的那一份輸出檔案上。
+// author、轉換 topic 前綴、驗證）都只發生在寫進 haileyCosmosBlog 專案的那一份輸出檔案上。
 //
-// 跟舊腳本不同的地方：Reef 的 content.config.ts 要求每篇文章必填 author 跟
+// 跟舊腳本不同的地方：haileyCosmosBlog 的 content.config.ts 要求每篇文章必填 author 跟
 // topic（用 reference() 驗證，build 時會實際檢查該筆記是否存在），vault 裡的
 // 筆記目前完全沒有這兩個欄位，所以這裡多了一層 frontmatter 解析跟驗證，而不
 // 是像舊腳本一樣整篇文字原封不動複製。
@@ -15,7 +15,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, copyFi
 import path from "node:path";
 
 // === 設定區：依實際路徑調整 ===
-const VAULT_POSTS_DIR = "D:\\File\\Books\\21_Public創作";
+const VAULT_POSTS_DIR = "D:\\File\\Books\\11_haileyCosmos\\posted";
 const VAULT_ASSETS_DIR = "D:\\File\\Books\\99_assets";
 const DEST_POSTS_DIR = path.resolve("./src/data/posts/zh");
 const DEST_TOPICS_DIR = path.resolve("./src/data/topics/zh");

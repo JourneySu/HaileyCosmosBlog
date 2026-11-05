@@ -5,10 +5,10 @@
 
 ## 筆記存放位置
 
-- 文章本體：`D:\File\Books\21_Public創作\<檔名>.md`
+- 文章本體：`D:\File\Books\11_haileyCosmos\posted\<檔名>.md`
 - 內文引用的圖片：`D:\File\Books\99_assets\<圖片檔名>`
 
-只有放在 `21_Public創作` 底下的 `.md` 檔，才會被同步腳本處理、發布到網站上。
+只有放在 `11_haileyCosmos\posted` 底下的 `.md` 檔，才會被同步腳本處理、發布到網站上。
 
 ## 每篇筆記 frontmatter 必填欄位
 

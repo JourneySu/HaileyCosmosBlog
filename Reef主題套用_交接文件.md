@@ -16,7 +16,7 @@
 | 舊專案 GitHub repo | JourneySu/myThinkingBlog |
 | 舊專案上線網址 | `mythinkingblog.ton-yuan-su.workers.dev`（Cloudflare Workers 靜態資產部署） |
 | Obsidian vault 路徑 | `D:\File\Books` |
-| Vault 發布用文章資料夾 | `D:\File\Books\21_Public創作` |
+| Vault 發布用文章資料夾 | `D:\File\Books\11_haileyCosmos\posted` |
 | Vault 附件（圖片）資料夾 | `D:\File\Books\99_assets` |
 | 新主題測試專案路徑 | `D:\File\reef-blog`（獨立資料夾，與 my-thinking、vault 皆分開） |
 | 新主題套件管理工具 | pnpm（非 npm，語法：`pnpm install`、`pnpm dev`、`pnpm build`） |
@@ -186,12 +186,9 @@ src/
 
 ### F. 內容遷移
 
-- [ ] vault 裡 `21_Public創作` 目前 3 篇筆記的處理狀態（2026-09-24 確認，尚未執行）：
-  - `test1.md`：測試殘留檔，**不處理**，不會同步
-  - `hello-world.md`：**要正式同步**，分類定案為 `topic: personal`，需使用者在 Obsidian 裡手動加上這行 frontmatter，再跑 `pnpm sync-content`
-  - `second-post.md`：**要正式同步**（內文的 Lorem Ipsum 是刻意用來測排版，非殘留檔），分類定案為 `topic: personal`，同樣需使用者手動在 Obsidian 加上 frontmatter 後執行同步
+- [x] vault 早期的 3 篇筆記（`test1`／`hello-world`／`second-post`）：**2026-11-05 結案**，使用者確認都只是測試文章，不再處理
 - [x] Topics設定：**2026-09-29 定案並完成**，最終只保留閱讀、個人兩個分類，見 `src/data/topics/zh/{reading,personal}.json`。原本 E-3 項一併建立的「減塑」分類（`reduce-plastic.json`）也已依使用者指示移除，之後有需要再自行新增
-- [x] （併入自 D 項）處理 `src/data/posts/zh/` 範本文章：**2026-09-29 完成**，4 篇原始英文範本、加上期間使用者自行測試同步的「新版面測試1」，全部確認是測試性質後一併刪除，`src/data/posts/zh/` 目前是空資料夾，等 F 項第一條的 `hello-world`／`second-post` 正式同步後才會有內容
+- [x] （併入自 D 項）處理 `src/data/posts/zh/` 範本文章：**2026-09-29 完成**，4 篇原始英文範本、加上期間使用者自行測試同步的「新版面測試1」，全部確認是測試性質後一併刪除，之後的文章由 vault 的 `posted` 資料夾同步進來
 - [x] （併入自 D 項）處理 `src/data/topics/zh/` 範本主題：**2026-09-29 完成**，5 個舊範本（craft／design／performance／studio／typography）全部刪除，見上面 Topics 設定一條
 - [ ] （併入自 D 項，2026-09-24）補完 `src/data/authors/zh/mara-lindqvist.json` 的 `role`／`bio` 欄位內容——**2026-09-29 更新**：使用者已自行把 `role` 改成空字串（確認 schema 允許空字串，不影響 build），`bio`（"閱讀、生活記錄"）目前仍是初版，尚未確認是否為最終版本
 

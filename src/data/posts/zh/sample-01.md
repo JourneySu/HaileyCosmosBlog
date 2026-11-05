@@ -1,12 +1,13 @@
 ---
-title: 範本文章一：重新開始的第一步
-description: 這是測試首頁版面用的範本文章，確認完請刪除。
+title: "範本文章一：重新開始的第一步"
+description: "這是測試首頁版面用的範本文章，確認完請刪除。"
 pubDate: 2026-10-01
 author: zh/mara-lindqvist
 topic: zh/personal
 cover: ../../../assets/covers/reef-bon-brief.webp
-coverAlt: 範本封面圖
+coverAlt: "範本封面圖"
 ---
+
 
 這是一篇範本文章，用來測試首頁「本月精選」與「最新筆記」區塊的版面。
 
