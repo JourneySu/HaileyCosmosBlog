@@ -38,9 +38,11 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
-    /* Racine legerement fluide : 16px sur mobile, 18px sur les tres grands
-     * ecrans. Tout le texte courant suit, sans une seule media query. */
-    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    /* Racine fixe a 16px (100 %, la preference du navigateur), comme la demo
+     * actuelle du theme. L'ancienne racine fluide montait a 18px sur les tres
+     * grands ecrans et grossissait tout le site de 12,5 % par rapport a la
+     * demo : tout ce qui est ecrit en rem suit cette valeur. */
+    font-size: 100%;
   }
 
   body {

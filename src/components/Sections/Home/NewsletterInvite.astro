@@ -1,5 +1,5 @@
 ---
-// src/components/Sections/Home/NewsletterInvite.astro - l'invitation a s'abonner : une scene sombre, la lettre a gauche, le flux a droite.
+// src/components/Sections/Home/NewsletterInvite.astro - l'invitation a s'abonner : une scene sombre et le formulaire d'inscription.
 //
 // C'est la deuxieme et derniere image de la page, et c'est voulu. La bande
 // precedente etait un formulaire pose sur un aplat gris, a un ton du fond de la
@@ -7,9 +7,8 @@
 // plus discrete de l'accueil. Elle reprend donc le materiau du premier ecran,
 // halos compris, et referme la page sur la scene qui l'a ouverte.
 //
-// Les deux moyens sont montres ensemble a dessein. Une invitation qui ne propose
-// qu'une adresse email traite le flux comme un detail technique, alors que c'est
-// le seul abonnement qui ne demande rien au lecteur et ne coute rien a l'auteur.
+// Ce site n'a pas de flux RSS : la colonne "flux" de la version d'origine a ete
+// retiree, il ne reste que la lettre, en une seule colonne.
 //
 // C'est aussi cette section qui porte id="newsletter", la cible du bouton
 // "S'abonner" de la barre. Le pied de page cede l'ancre et son formulaire des
@@ -17,8 +16,8 @@
 // d'ecart, c'est une page qui bafouille.
 //
 // Le formulaire est une DEMONSTRATION : il n'envoie rien et n'a volontairement
-// pas d'action. Voir le commentaire du meme bloc dans Sections/Global/Footer.astro
-// pour le brancher sur un prestataire.
+// pas d'action. Voir l'en-tete de Sections/Global/Footer.astro pour le brancher
+// sur un prestataire.
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { getLocale, useTranslations } from "@i18n";

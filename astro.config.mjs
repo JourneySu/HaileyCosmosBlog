@@ -35,8 +35,9 @@ function hreflangDuHtml(/** @type {string} */ pathname) {
 
 // https://astro.build/config
 export default defineConfig({
-  // Alimente canonical, OG, sitemap, robots.txt et llms.txt. Une seule edition les corrige tous.
-  site: "https://mythinkingblog.ton-yuan-su.workers.dev",
+  // Alimente canonical, OG, sitemap, robots.txt et llms.txt, et le domaine imprime
+  // sur les cartes de partage (scripts/og.mjs). Apres un changement : `pnpm og`.
+  site: "https://haileycosmosblog.ton-yuan-su.workers.dev",
 
   // Une seule forme d'URL canonique : le build en repertoires emet un slash final, et
   // canonical + OG s'accordent sur cette forme.

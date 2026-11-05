@@ -47,6 +47,10 @@ const at = title.toLowerCase().indexOf(accent.toLowerCase());
 const before = at >= 0 ? title.slice(0, at) : title;
 const word = at >= 0 ? title.slice(at, at + accent.length) : "";
 const after = at >= 0 ? title.slice(at + accent.length) : "";
+
+// Un "\n" du dictionaire devient un <br> : le retour a la ligne du titre est
+// voulu, pas laisse au hasard de la largeur. Sans "\n", rien ne change.
+const lines = (text: string): string[] => text.split("\n");
 ---
 
 {/* Le fond de page sur lequel la scene est posee. C'est lui qui fait exister le
@@ -177,12 +181,12 @@ const after = at >= 0 ? title.slice(at + accent.length) : "";
             {
               word ? (
                 <Fragment>
-                  {before}
+                  {lines(before).map((part, i) => <Fragment>{i > 0 && <br />}{part}</Fragment>)}
                   <span class="accent-script">{word}</span>
-                  {after}
+                  {lines(after).map((part, i) => <Fragment>{i > 0 && <br />}{part}</Fragment>)}
                 </Fragment>
               ) : (
-                title
+                lines(title).map((part, i) => <Fragment>{i > 0 && <br />}{part}</Fragment>)
               )
             }
           </h1>
@@ -196,7 +200,9 @@ const after = at >= 0 ? title.slice(at + accent.length) : "";
             texte secondaire a ete calcule pour un aplat sombre, pas pour une
             photographie qui bouge sous lui. */}
         <div class="flex min-w-0 flex-col items-start lg:justify-end lg:pb-2">
-          <p class="measure-wide leading-relaxed text-white/85 md:text-lg lg:text-xl">
+          {/* Un cran sous la demo (lg 1.125rem au lieu de 1.25rem) : en chinois,
+              le meme corps se lit plus grand qu'en latin. */}
+          <p class="measure-wide leading-relaxed text-white/85 lg:text-lg">
             {t.home.heroLede}
           </p>
 

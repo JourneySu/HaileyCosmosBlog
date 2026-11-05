@@ -8,15 +8,41 @@
 // Les colonnes viennent de getFooterData : trois seulement, et chaque entree
 // mene a une page que le theme construit vraiment. Un pied de page de blog qui
 // aligne les six colonnes d'un SaaS finit en depot de liens morts.
+//
+// Le formulaire d'inscription porte id="newsletter", la cible du bouton
+// "S'abonner" de la barre. Une page qui porte deja la bande d'invitation
+// (l'accueil) passe newsletter={false} : deux formulaires identiques a deux
+// ecrans d'ecart, c'est une page qui bafouille.
+//
+// Le formulaire est une DEMONSTRATION : il n'envoie rien et n'a volontairement
+// pas d'action. Pour le brancher, poser action et method vers le prestataire
+// choisi, ici et dans Sections/Home/NewsletterInvite.astro.
 import { Icon, type IconName } from "@components/svg/icons";
+import { Button } from "@components/ui/button";
+import { Input } from "@components/ui/input";
 import { getFooterData, getSiteRoutes } from "@config/navData.json.ts";
 import siteData from "@config/siteData.json";
 import { fmt, getLocale, useTranslations } from "@i18n";
+
+interface Props {
+  /** Affiche le formulaire d'inscription. Faux sur une page qui porte deja la bande d'invitation. */
+  newsletter?: boolean;
+}
+
+const { newsletter = true } = Astro.props;
 
 const locale = getLocale(Astro);
 const t = useTranslations(locale);
 const columns = getFooterData(locale);
 const routes = getSiteRoutes(locale);
+
+// Le mot accent du titre, decoupe comme dans NewsletterInvite.
+const title = t.newsletter.title;
+const accent = t.newsletter.accent;
+const at = title.toLowerCase().indexOf(accent.toLowerCase());
+const before = at >= 0 ? title.slice(0, at) : title;
+const word = at >= 0 ? title.slice(at, at + accent.length) : "";
+const after = at >= 0 ? title.slice(at + accent.length) : "";
 
 // Rangee d'icones : uniquement le set maison, et chaque lien porte un nom
 // accessible, parce qu'une icone seule n'en a aucun.
@@ -57,6 +83,48 @@ const columnLink =
         <p class="text-muted-foreground measure-prose text-[0.95rem] leading-relaxed">
           {t.footer.tagline}
         </p>
+
+        {
+          newsletter && (
+            <section class="flex flex-col gap-3" id="newsletter" aria-labelledby="newsletter-title">
+              <h2 id="newsletter-title" class="font-display text-xl font-bold tracking-tight">
+                {word ? (
+                  <Fragment>
+                    {before}
+                    <span class="accent-script">{word}</span>
+                    {after}
+                  </Fragment>
+                ) : (
+                  title
+                )}
+              </h2>
+              <p class="text-muted-foreground text-sm leading-relaxed">{t.newsletter.lede}</p>
+              <form class="mt-1 flex flex-col gap-3 sm:flex-row" name="newsletter">
+                <label class="sr-only" for="footer-newsletter-email">
+                  {t.newsletter.emailLabel}
+                </label>
+                <Input
+                  id="footer-newsletter-email"
+                  class="sm:flex-1"
+                  type="email"
+                  name="email"
+                  size="md"
+                  placeholder={t.newsletter.placeholder}
+                  autocomplete="email"
+                  spellcheck="false"
+                  aria-describedby="footer-newsletter-note"
+                  required
+                />
+                <Button type="submit" variant="primary" size="md" class="sm:shrink-0">
+                  {t.newsletter.submit}
+                </Button>
+              </form>
+              <p id="footer-newsletter-note" class="text-muted-foreground text-xs">
+                {t.newsletter.note}
+              </p>
+            </section>
+          )
+        }
       </div>
 
       <div class="grid grid-cols-2 gap-8 lg:col-span-8 lg:col-start-5">

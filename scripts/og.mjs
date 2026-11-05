@@ -10,10 +10,13 @@
  * vague aigue-marine) rasterise par sharp, deja present dans les
  * devDependencies.
  *
- * Les PNG ne sont PAS versionnes : `pnpm build` appelle ce script avant
- * `astro build`, donc un depot propre, une CI ou un `pnpm rebrand` refabriquent
- * les cartes aux couleurs du moment. C'est ce qui manquait : /og/default.png
- * repondait 404 en production.
+ * Les PNG SONT versionnes (voir .gitignore) et `pnpm build` n'appelle PAS ce
+ * script : apres un changement de domaine, de textes ou de couleurs, il faut
+ * lancer `pnpm og` a la main puis versionner public/og/.
+ *
+ * Le domaine imprime en bas de chaque carte est lu depuis `site` dans
+ * astro.config.mjs, la source unique de l'origine de production : il ne doit
+ * plus etre ecrit en dur ici.
  *
  * Personnalisation : edite PAGES ou appelle `makeOg(titre, sortie, accent)`.
  */
@@ -25,6 +28,11 @@ import sharp from "sharp";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "public/og");
+
+// Le domaine vient de `site` (astro.config.mjs) : un seul endroit a changer.
+const { default: astroConfig } = await import("../astro.config.mjs");
+if (!astroConfig.site) throw new Error("astro.config.mjs ne declare pas `site` : impossible d'imprimer le domaine sur les cartes OG.");
+const SITE_HOST = new URL(astroConfig.site).host;
 
 // Les tokens sont lus depuis la source de verite : un rebrand repeint aussi les OG.
 const tokens = readFileSync(join(ROOT, "src/styles/tokens.css"), "utf8");
@@ -101,7 +109,7 @@ function svgTemplate({ eyebrow, title }) {
   ${text}
 
   <path d="M 90 520 q 30 -26 60 0 t 60 0 t 60 0 t 60 0" fill="none" stroke="${ACCENT}" stroke-width="7" stroke-linecap="round"/>
-  <text x="1110" y="560" text-anchor="end" font-family="Space Grotesk, Inter Tight, Arial, sans-serif" font-weight="700" font-size="26" fill="${DEEP_SOFT}">mythinkingblog.ton-yuan-su.workers.dev</text>
+  <text x="1110" y="560" text-anchor="end" font-family="Space Grotesk, Inter Tight, Arial, sans-serif" font-weight="700" font-size="26" fill="${DEEP_SOFT}">${esc(SITE_HOST)}</text>
 </svg>`;
 }
 

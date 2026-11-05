@@ -120,17 +120,23 @@
    * anglaise du theme le 2026-09-18). Le line-height suit, releve pour la
    * meme raison que le corps est baisse, et ne descend nulle part sous 1.2.
    * La chasse est neutre plutot que negative : le CJK n'a pas besoin d'etre
-   * resserre comme une grotesque latine. */
-  --text-display-sm: clamp(1.49rem, 1.19rem + 1.19vw, 2rem);
+   * resserre comme une grotesque latine.
+   *
+   * Recalee le 2026-11-05 : la demo du theme a depuis reduit sa propre echelle
+   * (xl ramene a la valeur de lg, 3.5rem au plafond). Le facteur 0.85 est donc
+   * applique aux valeurs ACTUELLES de la demo, interlignage et chasse CJK
+   * inchanges. Sans ce recalage, le titre du hero debordait la hauteur minimale
+   * du premier ecran (min-h-[80svh]) et mangeait le jour sous le panneau. */
+  --text-display-sm: clamp(1.38rem, 1.1rem + 1.15vw, 1.91rem);
   --text-display-sm--line-height: 1.35;
   --text-display-sm--letter-spacing: 0em;
-  --text-display-md: clamp(1.79rem, 1.32rem + 1.96vw, 2.72rem);
+  --text-display-md: clamp(1.49rem, 1.15rem + 1.4vw, 2.13rem);
   --text-display-md--line-height: 1.3;
   --text-display-md--letter-spacing: 0em;
-  --text-display-lg: clamp(2.08rem, 1.4rem + 2.89vw, 3.7rem);
+  --text-display-lg: clamp(1.81rem, 0.85rem + 2.34vw, 2.98rem);
   --text-display-lg--line-height: 1.25;
   --text-display-lg--letter-spacing: 0em;
-  --text-display-xl: clamp(2.3rem, 1.4rem + 3.74vw, 4.68rem);
+  --text-display-xl: clamp(1.81rem, 0.85rem + 2.34vw, 2.98rem);
   --text-display-xl--line-height: 1.2;
   --text-display-xl--letter-spacing: 0em;
 

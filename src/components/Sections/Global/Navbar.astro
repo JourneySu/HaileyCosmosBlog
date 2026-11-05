@@ -1,5 +1,5 @@
 ---
-// src/components/Sections/Global/Navbar.astro - la barre flottante : marque, quatre rubriques, recherche, theme, tiroir mobile et etat retracte au scroll.
+// src/components/Sections/Global/Navbar.astro - la barre flottante : marque, quatre rubriques, recherche, theme, abonnement, tiroir mobile et etat retracte au scroll.
 //
 // Une barre de blog n'a pas de mega-menu. Le lecteur arrive par un article
 // partage, jamais par l'accueil : la barre doit lui dire ou il a atterri et lui
@@ -10,6 +10,7 @@
 // [data-header][data-shrunk="true"]::after degrade le contenu la ou la barre le
 // recouvre vraiment. Renommer cet attribut casse le fondu de bord.
 import { Icon } from "@components/svg/icons";
+import { Button } from "@components/ui/button";
 import { Sheet, SheetClose, SheetHeader, SheetTitle, SheetTrigger } from "@components/ui/sheet";
 import { ThemeToggle } from "@components/ui/theme-toggle";
 import { getNavData, getSiteRoutes } from "@config/navData.json.ts";
@@ -118,6 +119,12 @@ const navLink = [
           <Icon name="search" size={19} />
         </a>
         <ThemeToggle class="text-current hover:bg-current/8" label={t.nav.toggleTheme} />
+        {/* L'ancre #newsletter vise la bande d'invitation sur l'accueil, et le
+            formulaire du pied de page partout ailleurs. Masque sous sm : le
+            tiroir porte alors le meme bouton, en grand. */}
+        <Button href="#newsletter" variant="primary" size="sm" class="hidden sm:inline-flex">
+          {t.newsletter.submit}
+        </Button>
         <SheetTrigger
           for="mobile-nav"
           variant="ghost"
@@ -162,6 +169,10 @@ const navLink = [
       }
     </ul>
   </nav>
+
+  <div class="mt-auto flex flex-col gap-4">
+    <Button href="#newsletter" variant="primary" size="lg">{t.newsletter.submit}</Button>
+  </div>
 </Sheet>
 
 <script>

@@ -1,5 +1,5 @@
 ---
-// src/pages/[...locale]/index.astro - l'accueil editorial : ouverture, billet a la une, notes recentes, sujets et mot du studio.
+// src/pages/[...locale]/index.astro - l'accueil editorial : ouverture, billet a la une, notes recentes, sujets, mot du studio et invitation a s'abonner.
 //
 // L'accueil d'un blog n'est pas une page commerciale : il n'y a ni preuve sociale,
 // ni tarifs, ni bandeau de logos. Un lecteur arrive pour savoir s'il y a quelque
@@ -14,6 +14,7 @@ import FeaturedPost from "@components/Sections/Home/FeaturedPost.astro";
 import FilmScene from "@components/Sections/Home/FilmScene.astro";
 import Hero from "@components/Sections/Home/Hero.astro";
 import LatestPosts from "@components/Sections/Home/LatestPosts.astro";
+import NewsletterInvite from "@components/Sections/Home/NewsletterInvite.astro";
 import TopicMarquee from "@components/Sections/Home/TopicMarquee.astro";
 import TopicStrip from "@components/Sections/Home/TopicStrip.astro";
 import siteData from "@config/siteData.json";
@@ -99,7 +100,11 @@ const schemas = [
     <FilmScene />
     {latest.length > 0 && <LatestPosts posts={latest} />}
     <TopicStrip {topics} counts={topicCounts} />
+    {/* L'invitation a s'abonner ferme la page et porte id="newsletter", la
+        cible du bouton "S'abonner" de la barre. */}
+    <NewsletterInvite />
   </main>
 
-  <Footer />
+  {/* Le pied de page cede son formulaire : la bande ci-dessus le porte deja. */}
+  <Footer newsletter={false} />
 </BaseLayout>

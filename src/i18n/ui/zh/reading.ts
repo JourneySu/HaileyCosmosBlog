@@ -63,7 +63,7 @@ export const zhReading = {
     countLabel: "{count} 篇文章",
     countOne: "1 篇文章",
     emptyTitle: "這裡還沒有內容",
-    emptyLede: "這一頁沒有符合的文章。文章庫大約每隔幾週會更新，RSS 訂閱會通知你。",
+    emptyLede: "這一頁沒有符合的文章。文章庫大約每隔幾週會更新。",
     emptyCta: "回到所有文章",
   },
 
