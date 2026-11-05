@@ -121,8 +121,11 @@ const word = at >= 0 ? title.slice(at, at + accent.length) : "";
 const after = at >= 0 ? title.slice(at + accent.length) : "";
 ---
 
+{/* film--flat est pose des le rendu serveur : la sequence est coupee sur ce
+    site (voir _film.ts), et sans cette classe la section mesurerait trois
+    ecrans le temps que le script se charge. */}
 <section
-  class="film deep-scene"
+  class="film film--flat deep-scene"
   data-film
   data-from={from}
   data-to={to}

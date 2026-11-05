@@ -11,7 +11,8 @@
 import Footer from "@components/Sections/Global/Footer.astro";
 import Navbar from "@components/Sections/Global/Navbar.astro";
 import FeaturedPost from "@components/Sections/Home/FeaturedPost.astro";
-import FilmScene from "@components/Sections/Home/FilmScene.astro";
+// Section masquee sur ce site, voir le commentaire dans <main>.
+// import FilmScene from "@components/Sections/Home/FilmScene.astro";
 import Hero from "@components/Sections/Home/Hero.astro";
 import LatestPosts from "@components/Sections/Home/LatestPosts.astro";
 import NewsletterInvite from "@components/Sections/Home/NewsletterInvite.astro";
@@ -97,7 +98,10 @@ const schemas = [
         composition, ils se lisent comme un raccord rate. Au milieu de la
         page, la sequence coupe au contraire deux grilles de cartes, ce qui
         est exactement ce qu'une pleine largeur doit faire. */}
-    <FilmScene />
+    {/* Section "a propos" (FilmScene) masquee le 2026-11-05 a la demande de
+        l'autrice. Pour la remettre : retirer ce commentaire autour de la ligne
+        ci-dessous, et l'import de FilmScene en tete de fichier.
+    <FilmScene /> */}
     {latest.length > 0 && <LatestPosts posts={latest} />}
     <TopicStrip {topics} counts={topicCounts} />
     {/* L'invitation a s'abonner ferme la page et porte id="newsletter", la

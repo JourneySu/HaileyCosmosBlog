@@ -225,6 +225,12 @@ src/
 - [x] ~~`astro.config.mjs` 的 `site` 和實際上線網址不一致~~：2026-11-05 已修正（見 C 項）
 - [x] ~~`wrangler.jsonc` 的 `name` 和實際 Worker 名稱不一致~~：2026-11-05 已改成 `haileycosmosblog`（見 G 項）
 - [ ] 下次 push 後，確認 Cloudflare 有自動部署（見 G 項）
+- [x] `scripts/sync-content.mjs` 現在會把 Obsidian frontmatter 的 `featured` 帶過去（2026-11-05 完成）：`true` 才寫入，其他無法辨識的值只警告、文章照常同步。用暫存的假 vault 測過 true／false／不填／`yes`／`TRUE` 五種情況，沒有碰真實 vault。規則說明見 `部落格使用手冊.md` 第 5、6 節
+
+**2026-11-05 其他調整（使用者確認後執行）**
+
+- 首頁「關於」區塊（`FilmScene`）先改成固定照片（`_film.ts` 的 `animated()` 固定回傳 false），之後再依使用者指示從首頁隱藏（`index.astro` 裡註解掉）。兩處程式裡都有註解寫明恢復方法
+- 首頁精選與最新筆記的挑選規則，已整理進 `部落格使用手冊.md` 第 6 節
 
 ## 已刪除的 GitHub Actions 檢查（2026-11-05）
 

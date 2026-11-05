@@ -54,7 +54,15 @@ function setup(section: HTMLElement): Teardown | null {
   // dans load(), existe pour ca, et l'amorce lecture-pause du decodeur aussi.
   // Les seuls replis qui restent sont ceux du lecteur : mouvement reduit et
   // economie de donnees.
-  const animated = () => !reduce.matches && !thrifty();
+  // CE SITE : la sequence est COUPEE, la section reste toujours en affiche fixe
+  // (.film--flat, haute d'un ecran). Decision du 2026-11-05 : trois hauteurs
+  // d'ecran a derouler retenaient trop longtemps le lecteur. Aucune video n'est
+  // telechargee, puisque load() et tryLoad() exigent animated(). Pour
+  // reactiver la sequence, remettre : !reduce.matches && !thrifty(), et
+  // retirer film--flat de la balise dans FilmScene.astro.
+  void reduce;
+  void thrifty;
+  const animated = () => false;
 
   const from = Number(section.dataset.from ?? 0);
   const to = Number(section.dataset.to ?? 0);

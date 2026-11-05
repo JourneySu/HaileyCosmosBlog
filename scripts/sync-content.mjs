@@ -62,7 +62,7 @@ function yamlString(value) {
   return `"${value.replace(/"/g, '\\"')}"`;
 }
 
-function buildFrontmatter({ title, description, pubDate, topicSlug, coverFile, coverAlt }) {
+function buildFrontmatter({ title, description, pubDate, topicSlug, coverFile, coverAlt, featured }) {
   const lines = [
     "---",
     `title: ${yamlString(title)}`,
@@ -77,6 +77,8 @@ function buildFrontmatter({ title, description, pubDate, topicSlug, coverFile, c
     lines.push(`cover: ../../../assets/covers/${coverFile}`);
     if (coverAlt) lines.push(`coverAlt: ${yamlString(coverAlt)}`);
   }
+  // featured 只在 true 時才寫：網站 schema 的預設值就是 false，省略等於 false。
+  if (featured) lines.push("featured: true");
   lines.push("---");
   return lines.join("\n");
 }
@@ -139,6 +141,17 @@ for (const file of mdFiles) {
     }
   }
 
+  // featured 是選填的：決定這篇是否放首頁「本月精選」（規則見部落格使用手冊第 6 節）。
+  // Obsidian 的勾選框屬性存成 true／false；其他寫法只警告，文章照常同步，視為 false。
+  let featured = false;
+  if (data.featured !== undefined && data.featured !== "") {
+    const flag = data.featured.toLowerCase();
+    if (flag === "true") featured = true;
+    else if (flag !== "false") {
+      console.warn(`⚠️  「${file}」的 featured 值「${data.featured}」無法辨識，只接受 true 或 false，這篇先當作 false 同步`);
+    }
+  }
+
   const frontmatter = buildFrontmatter({
     title: data.title,
     description: data.description,
@@ -146,9 +159,10 @@ for (const file of mdFiles) {
     topicSlug: data.topic,
     coverFile,
     coverAlt: data.coverAlt,
+    featured,
   });
   writeFileSync(path.join(DEST_POSTS_DIR, file), `${frontmatter}\n\n${body}`, "utf-8");
-  console.log(`✅ 已同步文章：${file}（topic: zh/${data.topic}）`);
+  console.log(`✅ 已同步文章：${file}（topic: zh/${data.topic}${featured ? "，featured" : ""}）`);
   synced++;
 
   // 掃描這篇「通過驗證、真的會被同步」的文章裡引用到的圖片。
