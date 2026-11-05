@@ -185,11 +185,17 @@ src/
 - [x] （併入自 D 項）處理 `src/data/topics/zh/` 範本主題：**2026-09-29 完成**，5 個舊範本（craft／design／performance／studio／typography）全部刪除，見上面 Topics 設定一條
 - [ ] （併入自 D 項，2026-09-24）補完 `src/data/authors/zh/mara-lindqvist.json` 的 `role`／`bio` 欄位內容——**2026-09-29 更新**：使用者已自行把 `role` 改成空字串（確認 schema 允許空字串，不影響 build），`bio`（"閱讀、生活記錄"）目前仍是初版，尚未確認是否為最終版本
 
-### G. 最終部署決策與上線
+### G. 最終部署決策與上線（✅ 完成，2026-09-30）
 
-- [ ] 確認 `pnpm build`、`pnpm preview` 本機測試通過
-- [ ] 決定：直接取代 my-thinking 現有內容，或視為新專案重新接上 GitHub + Cloudflare
-- [ ] 正式部署，實測正式網站效果
+- [x] 確認 `pnpm build`、`pnpm preview` 本機測試通過
+- [x] 決定：**新專案重新接上 GitHub + Cloudflare**（未取代 my-thinking，舊站維持不動、零風險）。評估過程見對話紀錄：兩邊都是純靜態資產部署（無 Worker 腳本），技術上等價，新專案路線因為 repo 已經先設定好、不用動舊站的既有連接，判斷更省事
+- [x] 正式部署，實測正式網站效果：**上線網址 `https://haileycosmos.ton-yuan-su.workers.dev`**，已確認可正常開啟
+
+**部署過程中實際踩到的坑（供下次參考，也見下方「已知技術陷阱記錄」第 7 條）：**
+1. `wrangler.jsonc` 建立後忘記先 push，就在 Cloudflare 後台建立了「Connect to Git」專案，導致 Cloudflare 依 repo 名稱自動建立了一個名稱對不上本機設定的專案，一度考慮改名配合，最後使用者選擇**直接砍掉重建 Cloudflare 專案**，改用跟本機 `wrangler.jsonc` 一致的 `haileycosmos` 重新連接，問題自然消失
+2. Cloudflare Workers Builds 的建置環境會自動幫你安裝 `wrangler` 當 devDependency，連帶需要 `workerd`（Workers 執行環境本體）的原生二進位檔，pnpm 11 預設擋掉這類安裝腳本，導致第一次部署直接失敗（`ERR_PNPM_IGNORED_BUILDS`）。解法是在 `pnpm-workspace.yaml` 的 `allowBuilds` 補上 `workerd: true`，跟原本就有的 `esbuild`／`sharp` 同一套邏輯
+3. 上面第 2 點的修正目前**只存在於本機，還沒有 commit／push**（2026-09-30 確認）。這次部署剛好在沒有這個修正的版本下也成功了（原因不明，可能是 Cloudflare 建置快取重用了前一次失敗留下的 `workerd` 解析結果）。經跟使用者討論過因果關係（「沒 push wrangler.jsonc」跟「workerd 被擋」是兩個獨立問題，前者只影響命名對應，不影響 workerd 是否需要安裝），確認目前網站運作正常，**使用者決定：目前暫不處理，待後續真的發生部署失敗再回來補這個修正**（`pnpm-workspace.yaml` 本機的 `workerd: true` 那行本身不用復原，純粹是「先不 commit/push」的決定）
+4. Git 帳戶授權也曾一度顯示「已中斷連線」，導致 push 後沒有觸發自動重新部署，需要到 Cloudflare 帳號設定重新授權一次 GitHub App 才恢復正常
 
 ## 未來優化構想（非本次搬遷範圍，日後可考慮）
 
@@ -208,6 +214,7 @@ src/
    - 另外要提醒：這個資料層快取只有 `pnpm check`／`pnpm build`（一次性指令）會重新讀取。如果 `pnpm dev` 開發伺服器本來就在背景執行，就算清了快取，該伺服器也不會自動重新掃描，必須手動停掉（Ctrl+C）再重開，才會反映最新的檔案異動（同一類「dev server 沒跟上內容變化」的狀況）
 5. **Content Collection資料互相依賴**：Reef的posts會引用authors、topics的id，刪除被引用中的資料會導致build報錯（`Auteur inconnu "..."`這類錯誤），修改前建議先確認引用關係，或採用「先清空引用方，再刪除被引用方」的順序
 6. **Windows PowerShell語法差異**：不支援CMD語法如 `rmdir /s /q`，需用 `Remove-Item -Recurse -Force`
+7. **Cloudflare Workers Builds 也會踩到 pnpm 11 的建置腳本限制**（2026-09-30 發現）：本機開發只需要 `esbuild`、`sharp` 兩個套件的建置腳本授權（見 `pnpm-workspace.yaml`），但**只有在 Cloudflare 的建置環境上**，部署流程會額外自動安裝 `wrangler`（devDependency），連帶引入 `workerd`（Cloudflare Workers 執行環境本體），需要同一份 `allowBuilds` 清單裡補上 `workerd: true`，否則 Cloudflare 那端的部署會報 `ERR_PNPM_IGNORED_BUILDS` 失敗，即使本機 `pnpm build` 完全正常也一樣——這個坑只有實際連上 Cloudflare 部署才會顯現，本機測試看不出來
 
 ## 給接手 Agent 的建議執行順序
 
@@ -218,3 +225,27 @@ src/
 5. 內容遷移與最終部署（F、G項）
 
 每完成一個階段，建議執行 `pnpm build` 確認沒有破壞性錯誤，再進行下一階段，避免多個改動疊加後難以排查問題根源。
+
+## Cloudflare 連接 GitHub 步驟（下次開新 blog 時參考，2026-09-30 記錄）
+
+以下是這次實際走過、有成功部署的流程，照順序做即可。
+
+1. **本機先準備好 `wrangler.jsonc`**，放在專案根目錄，內容最簡單的純靜態資產部署寫法：
+   ```json
+   {
+     "name": "你的worker名稱",
+     "compatibility_date": "YYYY-MM-DD",
+     "assets": { "directory": "./dist" }
+   }
+   ```
+   `name` 決定預設網址 `<name>.你的帳號子網域.workers.dev`，先想好要取什麼名字。
+2. **確認 `pnpm-workspace.yaml` 的 `allowBuilds` 已包含 `esbuild`、`sharp`、`workerd` 三個**（見上方「已知技術陷阱記錄」第 7 條），這是 Cloudflare 建置環境專屬的坑，本機測試不會發現。
+3. **先 commit + push**，確認 GitHub 上的內容是最新的，再去 Cloudflare 後台建立連接——**順序很重要**：這次就是因為先連接後台、`wrangler.jsonc` 還沒 push 上去，導致 Cloudflare 依 repo 名稱自動建立了一個名稱對不上的專案，多繞一圈才修正。
+4. **Cloudflare Dashboard → Workers & Pages → 建立新專案 → Connect to Git**，選擇要連接的 repo。
+5. 填建置設定：
+   - 組建命令（Build command）：`pnpm run build`
+   - 部署命令（Deploy command）：`npx wrangler deploy`
+6. 送出後看第一次建置結果。若失敗，先看錯誤訊息裡有沒有 `ERR_PNPM_IGNORED_BUILDS`，有的話回到第 2 步補齊 `allowBuilds` 清單，commit/push 後會自動觸發重新建置。
+7. **如果之後 push 了新內容，但 Cloudflare 沒有自動觸發重新部署**：先去 Cloudflare 後台這個專案的頁面最上方，檢查有沒有「已與 Git 帳戶中斷連線」的提示；有的話代表不是 push 沒生效，是 Cloudflare 跟 GitHub 之間的帳號授權斷了，要去 Cloudflare 帳號設定重新授權一次 GitHub App。
+8. 部署成功後，記得**確認 `wrangler.jsonc` 的 `name` 是不是真的跟 Cloudflare 後台顯示的專案名稱一致**——如果連接後台時 `wrangler.jsonc` 還沒 push（違反第 3 步的建議順序），Cloudflare 可能會依 repo 名稱自動建立一個不同名稱的專案，造成兩邊對不上。這種情況下最乾淨的解法是把 Cloudflare 那個專案砍掉重建，用已經 push 好、名稱正確的 `wrangler.jsonc` 重新連接一次。
+9. 想換掉預設的 `*.workers.dev` 網址，之後可以另外買網域，到 Worker 的 Triggers 分頁「Add Custom Domain」接上去，跟這次部署流程是獨立的步驟，隨時可以做。
