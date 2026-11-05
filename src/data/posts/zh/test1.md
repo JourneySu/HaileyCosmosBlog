@@ -2,13 +2,11 @@
 title: test1
 description: Lorem ipsum dolor sit amet
 pubDate: Jul 31 2022
-heroImage: ../../assets/blog-placeholder-4.jpg
+author: zh/mara-lindqvist
+topic: zh/personal
 ---
 
-
 [[second-post]]
-
-
 
 > [!note] 筆記
 > 這是 Note 類型
