@@ -226,6 +226,15 @@ src/
 - [x] ~~`wrangler.jsonc` 的 `name` 和實際 Worker 名稱不一致~~：2026-11-05 已改成 `haileycosmosblog`（見 G 項）
 - [ ] 下次 push 後，確認 Cloudflare 有自動部署（見 G 項）
 
+## 已刪除的 GitHub Actions 檢查（2026-11-05）
+
+- **檔案**：`.github/workflows/verifier.yml`（Reef 內建的自動檢查，每次 push 會跑 check／build／test／lint:house）
+- **刪除原因**：從第一次 push 起每次都失敗，對本站沒有實際作用；部署由 Cloudflare 自己建置把關，建置失敗時網站會停在上一版
+- **要找回時**：最後一個包含它的 commit 是 `a138aa1`
+- **找回後不能直接用，要先修這兩個問題**：
+  1. 有一個步驟呼叫 `scripts/backoffice-manifest.mjs`，但這支腳本已隨後台功能一起刪除，要拿掉這個步驟
+  2. `lint:house` 會擋 em dash（`—`），目前 `Reef主題套用_交接文件.md`、`Obsidian寫作SOP.md`、`部落格使用手冊.md`、`scripts/og.mjs` 裡都有，要改掉
+
 ## 更換網址檢查清單（買網域、換網址時必做，2026-11-05 建立）
 
 > 起因：G 項部署時換了網址，但 `site` 沒跟著改，canonical、分享卡、sitemap 指向舊站超過一個月（2026-09-30 到 2026-11-05）都沒有發現。**網址一換，請依序做完下面每一項。**
