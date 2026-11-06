@@ -26,6 +26,7 @@
 - **防垃圾**：隱藏陷阱欄位、同一個 IP 1 分鐘最多 3 次、把訪客 IP 交給 Buttondown 防火牆判斷；Turnstile 先不做
 - **友善的結果訊息**：新訂閱、已訂閱過、格式錯誤、太頻繁、失敗、網路斷線各有中文訊息；失敗時附上 Buttondown 官方訂閱頁當備用
 - **待完成**：Buttondown 帳號審核中，確認信暫停寄送，審核通過後再做完整實測
+- **照片全部進版控，不再依賴 Pexels**：建置時不再從 Pexels 下載照片，網站用到的照片都 commit 在 repo 裡；你自己的封面圖也會被 commit，修正了「有自己封面圖的文章會部署失敗」的問題
 
 ---
 
@@ -84,6 +85,21 @@
 - 已確認：網站送出後顯示成功訊息，Buttondown 後台出現狀態為 `unactivated` 的測試信箱，代表網站到 Buttondown 的串接正常
 - Buttondown 帳號目前在人工審核中（通常 1 到 3 個工作天），確認信暫停寄送
 - 審核通過後要實測：收確認信、重複訂閱是否顯示「已經在訂閱名單上」、換頁後表單仍可用、手機版
+
+### 8. 照片全部進版控，不再依賴 Pexels
+
+**原本的問題**：`.gitignore` 排除了 `src/assets/covers/` 和 `src/assets/*.webp`。主題的範本照片原本是在每次建置時由 `scripts/covers.mjs` 從 Pexels 下載的，但同步腳本也把你自己的封面圖放在 `src/assets/covers/`，這些圖不會被 commit。文章只要用了自己的封面圖，Cloudflare 建置就會因為找不到圖片而失敗。另外，網站的照片取決於 Pexels 能不能正常下載，不在自己掌控中。
+
+| 檔案 | 改動 |
+|---|---|
+| `.gitignore` | 移除排除 `src/assets/` 圖片的規則，所有圖片都會被 commit |
+| `package.json` | `build` 拿掉 `node scripts/covers.mjs`；移除 `covers` 指令，避免誤跑時用 Pexels 的版本覆蓋 repo 裡的圖片 |
+| `scripts/covers.mjs` | 保留給 `pnpm test` 的自我檢查使用，開頭註解標明「這個網站已經不再執行它」 |
+| `src/assets/` | 首頁大圖 1 張、範本封面 9 張，共約 2.6 MB，第一次 commit 進 repo |
+| `src/assets/covers/Pasted image 20260929153637.png` | 9/29 測試留下、沒有任何文章使用，已刪除 |
+
+- 建置時唯一的外部下載已經拿掉。字型、OG 分享卡、favicon 本來就不需要連網。`FilmScene.astro` 裡的 Pexels 影片網址只在讀者瀏覽時才會載入，而且這個區塊已經隱藏，不會被載入。
+- 之後刪除範本文章時，9 張範本封面可以一起刪；`src/assets/reef-hero-vague.webp` 是首頁大圖，要保留。
 
 ---
 

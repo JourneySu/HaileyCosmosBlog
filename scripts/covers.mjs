@@ -3,8 +3,14 @@
  * scripts/covers.mjs - rapatrie les photographies du theme depuis Pexels,
  * avant le build.
  *
- * Usage :
- *   pnpm covers        telecharge src/assets/*.webp et src/assets/covers/*.webp
+ * SUR CE SITE, CE SCRIPT N'EST PLUS APPELE (2026-11-06) : les images sont
+ * versionnees dans src/assets/ et le build les prend telles quelles, pour que
+ * les photos du site ne dependent plus d'un tiers. Le script ne sert plus qu'a
+ * scripts/covers.selfcheck.mjs (pnpm test). Ne pas le relancer a la main : il
+ * ecraserait les images du depot par celles de Pexels.
+ *
+ * Usage d'origine :
+ *   node scripts/covers.mjs    telecharge src/assets/*.webp et src/assets/covers/*.webp
  *
  * Pourquoi un script et pas des fichiers versionnes : dix photographies dans
  * un depot, c'est un depot qui grossit a chaque retouche et un utilisateur qui

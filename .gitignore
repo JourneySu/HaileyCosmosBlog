@@ -24,12 +24,10 @@ dist/
 # au build, un clone doit donc les trouver deja la. Les regenerer apres un
 # rebrand, puis les commiter.
 
-# Photographies de la demo : rapatriees par `pnpm covers`, refabriquees au build.
-# Seules les photos du theme (reef-*.webp) sont ignorees : les couvertures des
-# articles, copiees par `pnpm sync-content` dans le meme dossier, DOIVENT etre
-# versionnees, sinon le build de Cloudflare ne les trouve pas et echoue.
-src/assets/covers/reef-*.webp
-src/assets/*.webp
+# Les images de src/assets/ (photo d'accueil, couvertures des articles) SONT
+# versionnees depuis le 2026-11-06 : le build ne telecharge plus rien chez
+# Pexels (scripts/covers.mjs n'est plus appele), il utilise ce qui est dans le
+# depot. Une image absente du depot casse donc le build de Cloudflare.
 
 # Outillage local des autres assistants de code : jamais publie.
 # CLAUDE.md et .claude/settings.json, eux, font partie du produit : ils
