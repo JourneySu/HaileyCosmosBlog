@@ -19,7 +19,7 @@ export const zhChrome = {
     contact: "聯絡",
     search: "搜尋",
     /** Libelle accessible du lien qui ramene le titre du blog a l'accueil. */
-    brandHome: "Hailey，回到首頁",
+    brandHome: "Hailey Cosmos，回到首頁",
     /** Les deux <nav> de la page portent un nom : sans lui, un lecteur d'ecran
      *  annonce "navigation" deux fois et ne dit pas laquelle des deux. */
     mainLabel: "主要導覽",
@@ -41,7 +41,7 @@ export const zhChrome = {
     sitemap: "網站地圖",
     backToTop: "回到頂端",
     /** Libelle accessible du lien qui ne porte qu'une icone. */
-    emailStudio: "寄信給工作室",
+    emailStudio: "寄信給我",
     followOn: "在 {network} 上追蹤 {name}",
   },
 

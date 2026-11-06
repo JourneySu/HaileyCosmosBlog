@@ -28,6 +28,7 @@
 - **待完成**：Buttondown 帳號審核中，確認信暫停寄送，審核通過後再做完整實測
 - **照片全部進版控，不再依賴 Pexels**：建置時不再從 Pexels 下載照片，網站用到的照片都 commit 在 repo 裡；你自己的封面圖也會被 commit，修正了「有自己封面圖的文章會部署失敗」的問題
 - **About 頁隱藏手機截圖**：右欄留白，排版不變
+- **網站名稱與 SEO**：網站名稱改為「海莉閱讀宇宙」，英文別名「Hailey Cosmos」；導覽列與頁尾顯示「Hailey Cosmos」；首頁標題、結構化資料、`llms.txt`、分享卡片同步更新
 
 ---
 
@@ -106,6 +107,19 @@
 
 - `about.astro`：註解掉 `<PhoneShot />` 和它的 import，保留兩欄排版、右欄留白，分隔線長度不變
 - 元件、截圖檔 `public/reef-iphone-poster.webp`、`pnpm poster` 指令都保留；之後要恢復或刪除，記在交接文件的「未來優化構想」
+
+### 10. 網站名稱與 SEO
+
+| 項目 | 結果 |
+|---|---|
+| 網站名稱（`siteData.name`） | 「Hailey」改為「海莉閱讀宇宙」：用於每頁標題後綴（例如「所有文章 \| 海莉閱讀宇宙」）、`og:site_name`、結構化資料 |
+| 英文別名（新增 `siteData.alternateName`） | 「Hailey Cosmos」：導覽列、手機選單、頁尾的品牌文字；結構化資料的 `alternateName` |
+| 首頁標題 | 海莉閱讀宇宙 Hailey Cosmos｜閱讀筆記與生活隨想 |
+| 結構化資料 | `schema.ts` 的 WebSite、Organization 支援 `alternateName`，自我檢查補 2 項 |
+| `llms.txt` | 標題改為「海莉閱讀宇宙 (Hailey Cosmos)」；刪除不存在的 `/authors/`；首頁、關於頁描述改成符合現況；語言說明改為單一語言 |
+| 分享卡片 | 小標改為「海莉閱讀宇宙」，並重新產生 `public/og/*.png`；`blog` 卡片標語的 em dash 改為逗號 |
+
+作者名稱維持「Hailey」，沒有變動。
 
 ---
 

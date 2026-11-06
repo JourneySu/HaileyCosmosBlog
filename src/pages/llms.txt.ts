@@ -15,25 +15,33 @@ export const GET: APIRoute = async ({ site, url }) => {
   const base = site ?? url;
   const absolute = (path: string): string => new URL(path, base).href;
 
+  // Ce site n'a qu'une langue : la phrase "published in N languages" du theme
+  // d'origine ne garde son sens que s'il en a plusieurs.
+  const languages =
+    locales.length === 1
+      ? `This site is written in ${localeMeta[locales[0]].label} (Traditional Chinese).`
+      : `This site is published in ${locales.length} languages: ` +
+        locales
+          .map((locale) => `${localeMeta[locale].label} (${absolute(localizePath("/", locale))})`)
+          .join(", ") +
+        ". Every page listed below exists in each of them.";
+
   const lines = [
-    `# ${siteData.name}`,
+    `# ${siteData.name} (${siteData.alternateName})`,
     "",
     `> ${siteData.description}`,
     "",
-    `This site is published in ${locales.length} languages: ` +
-      locales
-        .map((locale) => `${localeMeta[locale].label} (${absolute(localizePath("/", locale))})`)
-        .join(", ") +
-      ". Every page listed below exists in each of them.",
+    languages,
     "",
   ];
 
+  // Seulement les pages que ce site construit vraiment : pas de page auteurs,
+  // un lien mort ici enverrait un agent sur une 404.
   const core: [string, string][] = [
-    ["/", "the editorial home: featured post, latest notes, topics and writers"],
+    ["/", "the home page: the featured post, the latest notes and the topics"],
     ["/blog/", "every published post, newest first, paginated nine to a page"],
     ["/topics/", "the topic index; each topic has its own paginated archive"],
-    ["/authors/", "the people who write here, one page per byline"],
-    ["/about/", "how the studio works and why the notes are published"],
+    ["/about/", "who writes here (Hailey) and why this blog exists"],
   ];
 
   for (const locale of locales) {

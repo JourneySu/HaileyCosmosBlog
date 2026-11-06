@@ -4,7 +4,12 @@ import type { SiteDataProps } from "./types/configDataTypes";
 // Tout ce qui identifie la publication vit ici. C'est le premier fichier que
 // l'utilisateur edite, et le seul a editer pour changer de marque.
 const siteData: SiteDataProps = {
-  name: "Hailey",
+  // name : le nom officiel, pour le referencement (titres "Page | name",
+  // og:site_name, donnees structurees). alternateName : le nom latin, affiche
+  // comme marque dans la barre et le pied de page, et declare aux moteurs comme
+  // autre nom du meme site.
+  name: "海莉閱讀宇宙",
+  alternateName: "Hailey Cosmos",
   description:
     "一個離開日復一日的迴圈後，重新尋找生命意義的地方。閱讀、思考、書寫，記錄我一步步療癒自己、找回生活重量的過程。",
   useViewTransitions: true,
@@ -24,7 +29,7 @@ const siteData: SiteDataProps = {
 
   defaultImage: {
     src: "/og/default.png",
-    alt: "Hailey Cosmos: Outside the loop, one page at a time.",
+    alt: "海莉閱讀宇宙 Hailey Cosmos: Outside the loop, one page at a time.",
   },
 };
 

@@ -60,10 +60,11 @@ const siteUrl = new URL(localizePath("/", locale), base).href;
 const schemas = [
   organization({
     name: siteData.name,
+    alternateName: siteData.alternateName,
     url: siteUrl,
     sameAs: siteData.author.twitter ? [`https://x.com/${siteData.author.twitter}`] : undefined,
   }),
-  website({ name: siteData.name, url: siteUrl, description }),
+  website({ name: siteData.name, alternateName: siteData.alternateName, url: siteUrl, description }),
 ];
 ---
 

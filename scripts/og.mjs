@@ -50,10 +50,10 @@ const ACCENT_2 = token("coral-400", "#ff7a59");
 
 // title : ce qui s'affiche en enorme. eyebrow : la petite ligne au-dessus.
 const PAGES = [
-  { slug: "default", eyebrow: "Hailey Cosmos", title: "Outside the loop, one page at a time." },
-  { slug: "blog", eyebrow: "Hailey Cosmos · Posts", title: "Reading, thinking, writing — slowly." },
-  { slug: "topics", eyebrow: "Hailey Cosmos · Topics", title: "Every note, sorted by what it means." },
-  { slug: "about", eyebrow: "Hailey Cosmos · About", title: "A place to heal, slowly." },
+  { slug: "default", eyebrow: "海莉閱讀宇宙", title: "Outside the loop, one page at a time." },
+  { slug: "blog", eyebrow: "海莉閱讀宇宙 · 文章", title: "Reading, thinking, writing, slowly." },
+  { slug: "topics", eyebrow: "海莉閱讀宇宙 · 主題", title: "Every note, sorted by what it means." },
+  { slug: "about", eyebrow: "海莉閱讀宇宙 · 關於", title: "A place to heal, slowly." },
 ];
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

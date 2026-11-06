@@ -12,12 +12,14 @@
 export const zhPages = {
   // --- Accueil -------------------------------------------------------------
   home: {
-    metaTitle: "Hailey Cosmos，迴圈外的海莉",
+    // Contient le nom du site (siteData.name) : BaseHead n'ajoute donc pas
+    // le suffixe " | nom", le titre reste tel quel dans les resultats.
+    metaTitle: "海莉閱讀宇宙 Hailey Cosmos｜閱讀筆記與生活隨想",
     metaDescription:
       "一個離開日復一日的迴圈後，重新尋找生命意義的地方。閱讀、思考、書寫，記錄我一步步療癒自己、找回生活重量的過程。",
     eyebrow: "Hailey Cosmos",
     /** "\n" force un retour a la ligne dans le titre du hero (Hero.astro le rend en <br>). */
-    heroTitle: "Outside the Loop\n迴圈外的海莉",
+    heroTitle: "Outside the Loop\n海莉閱讀宇宙",
     heroAccent: "Loop",
     heroLede: "寫給自己，寫給被困在生活迴圈裡的靈魂們。閱讀、思考、書寫，記錄我一步步療癒自己、找回生活重量的過程。",
     heroPrimary: "開始閱讀",
@@ -50,9 +52,9 @@ export const zhPages = {
     metaTitle: "關於這裡",
     metaDescription: "一個在迴圈之外，練習慢慢療癒自己、寫下生活與思考的地方。",
     eyebrow: "關於",
-    title: "一個練習慢慢療癒自己的人",
-    accent: "慢慢療癒",
-    lede: "我是海莉，我曾活在日復一日的迴圈裡，說不出哪裡不對勁，卻感覺不到一絲意義。這裡記下我一路尋找答案、慢慢把自己接回來的過程，現在也仍在路上，如果你也在同樣的路上，希望我們能在這裡相遇。",
+    title: "你好，我是迴圈外的海莉",
+    accent: "迴圈外的海莉",
+    lede: "我曾活在日復一日的迴圈裡，說不出哪裡不對勁，卻感覺不到一絲意義。這裡記下我一路尋找答案、慢慢把自己接回來的過程，現在也仍在路上，如果你也在同樣的路上，希望我們能在這裡相遇。",
     storyTitle: "這個空間是怎麼開始的",
     storyAccent: "開始的",
     storyParagraphs: [
@@ -104,7 +106,7 @@ export const zhPages = {
     error: "傳送失敗。請直接寄信給我們，我們會在那邊收到。",
     directTitle: "或是跳過表單",
     directLede: "直接寄一封普通的電子郵件效果一樣好，而且一串信件串比表單更容易追蹤。",
-    directCta: "寄信給工作室",
+    directCta: "寄信給我",
     nextTitle: "接下來會發生什麼",
     nextSteps: [
       "兩個工作天內，我們其中一人會先簡短回覆。",
@@ -118,7 +120,7 @@ export const zhPages = {
     metaTitle: "主題",
     metaDescription: "Hailey Cosmos 涵蓋的所有主題：閱讀、思考、書寫，以及在生活裡慢慢尋找意義的各種面向。",
     eyebrow: "主題",
-    title: "我們持續書寫的五個主題",
+    title: "我持續書寫的主題",
     accent: "主題",
     lede: "每篇文章只歸屬一個主題。挑一條主線讀完整段，如果想照順序理解脈絡，從最舊的開始讀。",
     /** {count} vient du nombre d'articles publies dans le sujet. */

@@ -49,8 +49,8 @@ export const zhReading = {
     metaTitle: "所有文章",
     metaDescription: "Hailey Cosmos 發表過的所有文章，由新到舊：閱讀筆記、生活思考，以及一步步找回生命意義的紀錄。",
     eyebrow: "文章庫",
-    title: "我們寫過的所有東西",
-    accent: "所有東西",
+    title: "記錄所有寫的文章",
+    accent: "文章",
     lede: "完整的文章庫，由新到舊排列。當你還不確定要找什麼的時候，滑三十秒比打字搜尋更快。",
     /** Suffixe de titre des pages 2 et suivantes. */
     pageSuffix: "第 {n} 頁",
@@ -72,13 +72,13 @@ export const zhReading = {
   // /api/subscribe (worker/index.js) vers Buttondown ; les messages de resultat
   // sont affiches par src/components/Sections/Global/_newsletter.ts.
   newsletter: {
-    title: "一個月一封信",
-    accent: "一個月",
-    lede: "簡短整理我們發表過的內容，還有我們搞砸的地方。沒有追蹤像素，沒有連續信件轟炸，一鍵就能永久退訂。",
+    title: "雙週一封信",
+    accent: "雙週",
+    lede: "簡短整理近期發表內容。沒有連續信件轟炸，訂閱後隨時可退訂。",
     emailLabel: "你的電子郵件",
     placeholder: "you@example.com",
     submit: "訂閱",
-    note: "一個月一封信。隨時可以取消訂閱。",
+    note: "每雙週一封信。隨時可以取消訂閱。",
     /** Texte du bouton pendant l'envoi. */
     sending: "送出中…",
     success: "快完成了。請點擊我們剛剛寄出的確認信。",

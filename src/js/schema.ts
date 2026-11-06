@@ -21,6 +21,8 @@ function isoDate(value: Date | string): string {
 
 export interface OrganizationInput {
   name: string;
+  /** Autre nom sous lequel le site est connu (ex. son nom latin). */
+  alternateName?: string;
   url: string;
   logo?: string;
   sameAs?: string[];
@@ -32,6 +34,7 @@ export function organization(input: OrganizationInput): JsonLdNode {
     "@context": CONTEXT,
     "@type": "Organization",
     name: input.name,
+    alternateName: input.alternateName,
     url: input.url,
     logo: input.logo,
     sameAs: input.sameAs,
@@ -40,6 +43,8 @@ export function organization(input: OrganizationInput): JsonLdNode {
 
 export interface WebsiteInput {
   name: string;
+  /** Autre nom du site : Google le lit pour choisir le nom affiche dans les resultats. */
+  alternateName?: string;
   url: string;
   description?: string;
 }
@@ -50,6 +55,7 @@ export function website(input: WebsiteInput): JsonLdNode {
     "@context": CONTEXT,
     "@type": "WebSite",
     name: input.name,
+    alternateName: input.alternateName,
     url: input.url,
     description: input.description,
   });

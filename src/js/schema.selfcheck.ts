@@ -50,6 +50,16 @@ is(
   },
   "website carries name, url and description",
 );
+is(
+  website({ name: "Example Studio", alternateName: "Exemple", url: "https://example.com/" }).alternateName,
+  "Exemple",
+  "website carries its alternate name",
+);
+is(
+  organization({ name: "Example Studio", alternateName: "Exemple", url: "https://example.com/" }).alternateName,
+  "Exemple",
+  "organization carries its alternate name",
+);
 
 // article : dates normalisees, noeuds imbriques sans @context.
 const post = article({

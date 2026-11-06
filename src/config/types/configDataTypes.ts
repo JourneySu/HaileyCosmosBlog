@@ -1,7 +1,10 @@
 // src/config/types/configDataTypes.ts - types partages par tous les fichiers de config de src/config.
 
 export interface SiteDataProps {
+  /** Nom officiel du site : titres de page, og:site_name, donnees structurees. */
   name: string;
+  /** Autre nom du site : marque affichee dans la barre et le pied de page, et alternateName des donnees structurees. */
+  alternateName: string;
   description: string;
   useViewTransitions?: boolean;
   author: {
