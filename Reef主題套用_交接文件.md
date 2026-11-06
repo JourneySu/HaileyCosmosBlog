@@ -1,6 +1,6 @@
 # Reef 主題套用作業 — AI Agent 交接文件
 
-> **目前版本：v1.2.202611051341（2026-11-05）**。每個版本實際改了什麼，請看 `Release_Note.md`；這份文件記錄專案背景、使用者的決策和已知陷阱。
+> **目前版本：v1.3.202611061456（2026-11-06）**。每個版本實際改了什麼，請看 `Release_Note.md`；這份文件記錄專案背景、使用者的決策和已知陷阱。
 
 ## 專案背景
 
@@ -220,7 +220,7 @@ src/
 - [x] 訂閱表單串接 Buttondown（2026-11-06）：表單送到自己的 `/api/subscribe`，由 `worker/index.js` 用 API key 呼叫 Buttondown，不離開頁面。Astro 維持純靜態、沒有加 adapter。使用方式、設定位置、出問題時看哪裡，見 `部落格使用手冊.md` 第 7 節
 - [ ] Buttondown 實測：重複訂閱、被防火牆擋下時的實際回傳，要看 Cloudflare Observability 的記錄（搜尋 `subscribe:`），確認 `worker/index.js` 的判斷（目前用回傳內容有沒有 `already`／`exist` 判斷「已訂閱」）是否正確
 - [ ] Turnstile：這次刻意不做，先用陷阱欄位、IP 頻率限制和 Buttondown 防火牆。之後如果 Buttondown 後台出現大量未確認的陌生信箱，再加上
-- [ ] **封面圖沒有進版控**（2026-11-06 發現）：`.gitignore` 排除了 `src/assets/covers/` 和 `src/assets/*.webp`，原本是給主題的範本照片用的（建置時 `scripts/covers.mjs` 會從 Pexels 下載）。但同步腳本也把使用者自己的封面圖放在 `src/assets/covers/`，這些圖不會被 commit。真實文章如果用了自己的封面圖，push 後 Cloudflare 建置會因為找不到圖片而失敗。範本文章沒出事，是因為它們用的剛好是 `covers.mjs` 會下載的範本照片
+- [x] **封面圖沒有進版控**（2026-11-06 發現並修正，採方案 A：`.gitignore` 從排除整個 `src/assets/covers/` 改成只排除 `src/assets/covers/reef-*.webp`，自己的封面圖現在會被 commit；9/29 測試留下的 `Pasted image 20260929153637.png` 一併刪除）。原始問題：`.gitignore` 排除了 `src/assets/covers/` 和 `src/assets/*.webp`，原本是給主題的範本照片用的（建置時 `scripts/covers.mjs` 會從 Pexels 下載）。但同步腳本也把使用者自己的封面圖放在 `src/assets/covers/`，這些圖不會被 commit。真實文章如果用了自己的封面圖，push 後 Cloudflare 建置會因為找不到圖片而失敗。範本文章沒出事，是因為它們用的剛好是 `covers.mjs` 會下載的範本照片
 - [ ] 訂閱文案（「一個月一封信」、「沒有追蹤像素」等）是從原版範本翻過來的，使用者表示這次先不動，之後再看要不要改成符合實際的寄信頻率
 - [x] ~~`astro.config.mjs` 的 `site` 和實際上線網址不一致~~：2026-11-05 已修正（見 C 項）
 - [x] ~~`wrangler.jsonc` 的 `name` 和實際 Worker 名稱不一致~~：2026-11-05 已改成 `haileycosmosblog`（見 G 項）

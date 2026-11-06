@@ -14,6 +14,79 @@
 
 ---
 
+## v1.3.202611061456（2026-11-06）
+
+主題：訂閱表單串接 Buttondown 電子報。
+
+### 更改重點
+
+- **訂閱表單真的能訂閱了**：首頁和頁尾的表單串接 Buttondown，按下「訂閱」後**不會離開部落格**，結果直接顯示在表單下方
+- **新增 Worker**：表單送到網站自己的 `/api/subscribe`，由 Worker 用 API key 呼叫 Buttondown。Astro 維持純靜態，沒有加 adapter
+- **API key 不在程式碼裡**：設在 Cloudflare 後台的機密 `BUTTONDOWN_API_KEY`，使用只開 Subscribers 權限的專用 key
+- **防垃圾**：隱藏陷阱欄位、同一個 IP 1 分鐘最多 3 次、把訪客 IP 交給 Buttondown 防火牆判斷；Turnstile 先不做
+- **友善的結果訊息**：新訂閱、已訂閱過、格式錯誤、太頻繁、失敗、網路斷線各有中文訊息；失敗時附上 Buttondown 官方訂閱頁當備用
+- **待完成**：Buttondown 帳號審核中，確認信暫停寄送，審核通過後再做完整實測
+
+---
+
+### 1. 運作方式
+
+讀者按「訂閱」→ 前端程式攔下表單，在背景送到 `/api/subscribe` → Worker 檢查後呼叫 Buttondown API（`POST https://api.buttondown.com/v1/subscribers`）→ 回傳結果代碼 → 前端在表單下方顯示對應訊息。
+
+- 靜態頁面照舊由 Cloudflare 直接提供，不會經過 Worker；只有 `/api/subscribe` 這個網址由 Worker 處理
+- 沒有指定訂閱者類型，Buttondown 會建立 `unactivated`（待確認）的訂閱者並寄出確認信，維持雙重確認
+- 錯誤細節只會記在 Cloudflare 的 Observability 紀錄裡（搜尋 `subscribe:`），不會傳到前端
+
+### 2. 新增與修改的檔案
+
+| 檔案 | 改動 |
+|---|---|
+| `worker/index.js`（新增） | 處理 `POST /api/subscribe`：陷阱欄位 → email 格式 → IP 頻率限制 → 呼叫 Buttondown → 回傳代碼（`success`、`already`、`invalid`、`limited`、`failed`）；其他網址交給靜態資源 |
+| `wrangler.jsonc` | 加入 `main`（Worker 程式）、`assets.binding`、頻率限制 `SUBSCRIBE_LIMITER`（每個 IP 60 秒 3 次）、開啟 Observability |
+| `src/components/Sections/Global/_newsletter.ts`（新增） | 前端送出程式：在 document 層級監聽，換頁後不用重新綁定；送出時按鈕顯示「送出中…」並停用，避免重複送出 |
+| `NewsletterInvite.astro`、`Footer.astro` | 表單加上 `action="/api/subscribe"`、`method="post"`、`data-astro-reload`、隱藏陷阱欄位 `website`、結果顯示區（`role="status"`，螢幕閱讀器也會唸出）；外觀不變 |
+| `src/i18n/ui/zh/reading.ts` | 新增結果訊息：`sending`、`already`、`limited`、`failed`、`failedLink`、`offline`；`error` 改成用在信箱格式錯誤 |
+| `src/config/siteData.json.ts`、`configDataTypes.ts` | 新增 `newsletterPage`（備用訂閱頁 `https://buttondown.com/haileycosmos`） |
+| `.gitignore` | 加入 `.dev.vars`（本機測試用的金鑰檔案） |
+| `THIRD-PARTY.md` | 新增「External services」，記錄 Buttondown |
+
+### 3. 讀者會看到的訊息
+
+| 情況 | 訊息 |
+|---|---|
+| 新訂閱成功 | 快完成了。請點擊我們剛剛寄出的確認信。 |
+| 已經訂閱過 | 這個信箱已經在訂閱名單上了，謝謝你！如果還沒收到確認信，請檢查垃圾信件匣。 |
+| 信箱格式錯誤 | 這個信箱格式看起來不太對，請檢查後再試一次。 |
+| 送出太頻繁 | 送出次數有點多，請過一分鐘再試一次。 |
+| 其他失敗 | 訂閱沒有成功。你可以稍後再試，或到這裡訂閱。（連到 Buttondown 官方訂閱頁） |
+| 網路斷線 | 目前無法送出，請確認網路連線後再試。 |
+
+### 4. 刻意不做的部分
+
+- **Turnstile**：先用陷阱欄位、IP 頻率限制和 Buttondown 防火牆。之後如果 Buttondown 後台出現大量未確認的陌生信箱，再加上
+- **瀏覽器關閉 JavaScript 的情況**：不另外處理。這時表單會直接送出，畫面會顯示程式回傳的文字，但訂閱一樣會成功
+
+### 5. 帳號與部署設定
+
+- Buttondown 另外建立專用 API key，只開 **Subscribers：Read & write**，其他權限全部關閉；原本不小心貼在對話裡的 Primary Key 已重新產生作廢
+- Cloudflare 後台 → `haileycosmosblog` → 設定 → 變數與機密 → 機密 `BUTTONDOWN_API_KEY`
+- 只有靜態資源的 Worker 不能設定機密，所以要先 push 含 Worker 程式的版本，再到後台新增
+
+### 6. 文件更新
+
+| 文件 | 更新內容 |
+|---|---|
+| `部落格使用手冊.md` | 新增第 7 節「電子報訂閱」：運作方式、訊息、設定位置、出問題時看哪裡、本機測試方法 |
+| `Reef主題套用_交接文件.md` | H 項更新串接狀態與待辦；已知陷阱新增第 10 條（只有靜態資源的 Worker 不能設定機密） |
+
+### 7. 目前狀態與待辦
+
+- 已確認：網站送出後顯示成功訊息，Buttondown 後台出現狀態為 `unactivated` 的測試信箱，代表網站到 Buttondown 的串接正常
+- Buttondown 帳號目前在人工審核中（通常 1 到 3 個工作天），確認信暫停寄送
+- 審核通過後要實測：收確認信、重複訂閱是否顯示「已經在訂閱名單上」、換頁後表單仍可用、手機版
+
+---
+
 ## v1.2.202611051341（2026-11-05）
 
 主題：恢復訂閱功能，並修正與 Reef 官方 demo 的比例差異。

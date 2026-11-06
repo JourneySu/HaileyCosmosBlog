@@ -25,7 +25,10 @@ dist/
 # rebrand, puis les commiter.
 
 # Photographies de la demo : rapatriees par `pnpm covers`, refabriquees au build.
-src/assets/covers/
+# Seules les photos du theme (reef-*.webp) sont ignorees : les couvertures des
+# articles, copiees par `pnpm sync-content` dans le meme dossier, DOIVENT etre
+# versionnees, sinon le build de Cloudflare ne les trouve pas et echoue.
+src/assets/covers/reef-*.webp
 src/assets/*.webp
 
 # Outillage local des autres assistants de code : jamais publie.
