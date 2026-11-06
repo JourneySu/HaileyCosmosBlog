@@ -1,7 +1,24 @@
+// wrangler.jsonc - deploiement Cloudflare : les fichiers statiques de dist/, plus le Worker de worker/index.js pour /api/subscribe.
 {
   "name": "haileycosmosblog",
   "compatibility_date": "2026-09-30",
+  "main": "./worker/index.js",
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  // Limite d'envois du formulaire d'inscription, par IP : 3 par minute.
+  // Cloudflare n'accepte que 10 ou 60 secondes comme periode.
+  "ratelimits": [
+    {
+      "name": "SUBSCRIBE_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 3, "period": 60 }
+    }
+  ],
+  // Journaux du Worker dans le tableau de bord (onglet Observability) : c'est
+  // la que se lisent les refus de Buttondown.
+  "observability": {
+    "enabled": true
   }
 }

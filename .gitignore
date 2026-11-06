@@ -16,6 +16,10 @@ dist/
 # construire ni pour se deployer ; ce fichier reste ignore par principe.
 .env
 
+# Secrets locaux de `wrangler dev` (BUTTONDOWN_API_KEY). Ne JAMAIS versionner :
+# en production, le secret vit dans le tableau de bord Cloudflare.
+.dev.vars
+
 # Les cartes Open Graph de public/og/ sont VERSIONNEES : `pnpm og` ne tourne pas
 # au build, un clone doit donc les trouver deja la. Les regenerer apres un
 # rebrand, puis les commiter.

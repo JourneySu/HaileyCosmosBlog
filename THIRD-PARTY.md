@@ -110,6 +110,14 @@ Never shipped to the browser.
 | @astrojs/check | MIT | astro check |
 | sharp | Apache-2.0 | Rasterizes the OG SVG template in scripts/og.mjs |
 
+## External services
+
+Called at runtime, not bundled. No npm package is added for them.
+
+| Service | Called from | Why it is here |
+|---|---|---|
+| Buttondown (buttondown.com) | worker/index.js, server side only | Newsletter signups: the site forms post to /api/subscribe, and the Worker creates the subscriber through the Buttondown API (`POST https://api.buttondown.com/v1/subscribers`). The API key is a Cloudflare secret (`BUTTONDOWN_API_KEY`) and never reaches the browser. The page https://buttondown.com/haileycosmos is linked as a fallback when a signup fails |
+
 ## What is deliberately absent
 
 - No analytics, tracking or consent scripts.

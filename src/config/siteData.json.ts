@@ -18,6 +18,10 @@ const siteData: SiteDataProps = {
     twitter: "",
   },
 
+  // Page d'inscription Buttondown : proposee au lecteur si l'envoi du
+  // formulaire du site echoue. Elle a son propre CAPTCHA et marche toujours.
+  newsletterPage: "https://buttondown.com/haileycosmos",
+
   defaultImage: {
     src: "/og/default.png",
     alt: "Hailey Cosmos: Outside the loop, one page at a time.",

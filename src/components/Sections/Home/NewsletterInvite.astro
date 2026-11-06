@@ -15,17 +15,33 @@
 // que la page porte cette bande : deux formulaires identiques a deux ecrans
 // d'ecart, c'est une page qui bafouille.
 //
-// Le formulaire est une DEMONSTRATION : il n'envoie rien et n'a volontairement
-// pas d'action. Voir l'en-tete de Sections/Global/Footer.astro pour le brancher
-// sur un prestataire.
+// L'envoi passe par /api/subscribe (worker/index.js) vers Buttondown, sans
+// quitter la page : voir Sections/Global/_newsletter.ts. Le meme branchement
+// sert le formulaire du pied de page (Sections/Global/Footer.astro).
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
+import siteData from "@config/siteData.json";
 import { getLocale, useTranslations } from "@i18n";
 import { Image } from "astro:assets";
 import heroVague from "../../../assets/reef-hero-vague.webp";
 
 const locale = getLocale(Astro);
 const t = useTranslations(locale);
+
+// Les messages de resultat, lus par _newsletter.ts : le texte reste dans le
+// dictionnaire, le script ne fait que choisir.
+const newsletterAttrs = {
+  "data-newsletter-status": "home-newsletter-status",
+  "data-msg-sending": t.newsletter.sending,
+  "data-msg-success": t.newsletter.success,
+  "data-msg-already": t.newsletter.already,
+  "data-msg-invalid": t.newsletter.error,
+  "data-msg-limited": t.newsletter.limited,
+  "data-msg-failed": t.newsletter.failed,
+  "data-msg-offline": t.newsletter.offline,
+  "data-fallback-url": siteData.newsletterPage,
+  "data-fallback-label": t.newsletter.failedLink,
+};
 
 const title = t.newsletter.title;
 const accent = t.newsletter.accent;
@@ -99,8 +115,23 @@ const after = at >= 0 ? title.slice(at + accent.length) : "";
         </h2>
         <p class="text-muted-foreground measure-wide text-lg leading-relaxed">{t.newsletter.lede}</p>
 
-        <form class="mt-2 flex flex-col gap-3 sm:max-w-xl sm:flex-row" name="newsletter-home">
+        {/* data-astro-reload : le routeur client ne doit pas s'emparer de ce
+            formulaire, c'est _newsletter.ts qui l'envoie. */}
+        <form
+          class="mt-2 flex flex-col gap-3 sm:max-w-xl sm:flex-row"
+          name="newsletter-home"
+          action="/api/subscribe"
+          method="post"
+          data-newsletter
+          data-astro-reload
+          {...newsletterAttrs}
+        >
           <label class="sr-only" for="home-newsletter-email">{t.newsletter.emailLabel}</label>
+          {/* Champ piege : cache aux humains et aux lecteurs d'ecran, rempli par
+              les robots. Voir worker/index.js. */}
+          <div class="hidden" aria-hidden="true">
+            <input type="text" name="website" tabindex="-1" autocomplete="off" />
+          </div>
           <Input
             id="home-newsletter-email"
             class="sm:flex-1"
@@ -117,11 +148,25 @@ const after = at >= 0 ? title.slice(at + accent.length) : "";
             {t.newsletter.submit}
           </Button>
         </form>
-        <p id="home-newsletter-note" class="text-muted-foreground text-sm">{t.newsletter.note}</p>
+        <div>
+          <p id="home-newsletter-note" class="text-muted-foreground text-sm">{t.newsletter.note}</p>
+          {/* Zone de resultat : presente des le rendu (une region live inseree
+              apres coup n'est pas annoncee), vide et sans hauteur tant que
+              rien n'a ete envoye. */}
+          <p
+            id="home-newsletter-status"
+            class="text-foreground data-[state=error]:text-accent-text mt-2 text-sm empty:mt-0"
+            role="status"
+          ></p>
+        </div>
       </div>
     </div>
   </section>
 </div>
+
+<script>
+  import "../Global/_newsletter";
+</script>
 
 <style>
   /* Le voile du bandeau d'invitation.

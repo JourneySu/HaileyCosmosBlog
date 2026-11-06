@@ -217,7 +217,10 @@ src/
 
 **v1.2 留下的待辦（使用者尚未決定）**
 
-- [ ] 訂閱表單要接哪家電子報服務（目前沒有 `action`）
+- [x] 訂閱表單串接 Buttondown（2026-11-06）：表單送到自己的 `/api/subscribe`，由 `worker/index.js` 用 API key 呼叫 Buttondown，不離開頁面。Astro 維持純靜態、沒有加 adapter。使用方式、設定位置、出問題時看哪裡，見 `部落格使用手冊.md` 第 7 節
+- [ ] Buttondown 實測：重複訂閱、被防火牆擋下時的實際回傳，要看 Cloudflare Observability 的記錄（搜尋 `subscribe:`），確認 `worker/index.js` 的判斷（目前用回傳內容有沒有 `already`／`exist` 判斷「已訂閱」）是否正確
+- [ ] Turnstile：這次刻意不做，先用陷阱欄位、IP 頻率限制和 Buttondown 防火牆。之後如果 Buttondown 後台出現大量未確認的陌生信箱，再加上
+- [ ] **封面圖沒有進版控**（2026-11-06 發現）：`.gitignore` 排除了 `src/assets/covers/` 和 `src/assets/*.webp`，原本是給主題的範本照片用的（建置時 `scripts/covers.mjs` 會從 Pexels 下載）。但同步腳本也把使用者自己的封面圖放在 `src/assets/covers/`，這些圖不會被 commit。真實文章如果用了自己的封面圖，push 後 Cloudflare 建置會因為找不到圖片而失敗。範本文章沒出事，是因為它們用的剛好是 `covers.mjs` 會下載的範本照片
 - [ ] 訂閱文案（「一個月一封信」、「沒有追蹤像素」等）是從原版範本翻過來的，使用者表示這次先不動，之後再看要不要改成符合實際的寄信頻率
 - [x] ~~`astro.config.mjs` 的 `site` 和實際上線網址不一致~~：2026-11-05 已修正（見 C 項）
 - [x] ~~`wrangler.jsonc` 的 `name` 和實際 Worker 名稱不一致~~：2026-11-05 已改成 `haileycosmosblog`（見 G 項）
@@ -291,6 +294,7 @@ src/
 
 8. **拿 demo 對照時，demo 不等於本機的原版**（2026-11-05 發現）：原 GitHub repo 已經無法存取，只能用 demo 網站的 HTML 對照，但 demo 在使用者下載之後還有更新。比對時看到本機完全沒有的 class 或元件（例如 `scene-lumiere`、`border-beam`、`Scene.astro`、`user-invalid:`），應該先當作「demo 後來新增的」，不是先前 AI 刪掉的。另外，先前 AI 在 `tokens.css` 註解寫的「已和 demo 對照確認」，對照的是舊版 demo，不能當作和現在的 demo 一致
 9. **兩個比例設定會影響全站**（2026-11-05）：`src/styles/global.css` 的 `html { font-size }` 是全站 `rem` 的基準，改了它，導覽列、按鈕、內文、間距都會一起變；`src/styles/tokens.css` 的 `--text-display-*` 決定所有大標題。另外，首頁第一屏面板有最小高度 `min-h-[80svh]`，標題太高時會把面板撐長、吃掉下方的空隙，所以調標題字級時要一起看第一屏
+10. **只有靜態資源的 Worker 不能設定變數或機密**（2026-11-06）：Cloudflare 後台會顯示「無法將變數新增到只有靜態資產的 Worker 中」。要先讓 `wrangler.jsonc` 有 `main`（Worker 程式）並部署一次，後台才會開放新增機密。所以設定 `BUTTONDOWN_API_KEY` 的順序是：先 push 含 Worker 的版本，再到後台加機密
 
 ## 給接手 Agent 的建議執行順序
 

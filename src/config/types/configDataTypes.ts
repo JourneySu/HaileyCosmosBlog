@@ -9,6 +9,8 @@ export interface SiteDataProps {
     email: string;
     twitter?: string;
   };
+  /** Page d'inscription hebergee par le prestataire de lettre : l'issue de secours quand l'envoi du formulaire echoue. */
+  newsletterPage: string;
   defaultImage: {
     src: string;
     alt: string;

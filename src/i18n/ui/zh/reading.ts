@@ -68,8 +68,9 @@ export const zhReading = {
   },
 
   // --- Newsletter ----------------------------------------------------------
-  // Le bloc vit dans le pied de page et en fin d'article. Il n'appelle aucun
-  // prestataire : l'utilisateur branche le sien sur le formulaire deja ecrit.
+  // Le bloc vit dans le pied de page et sur l'accueil. L'envoi passe par
+  // /api/subscribe (worker/index.js) vers Buttondown ; les messages de resultat
+  // sont affiches par src/components/Sections/Global/_newsletter.ts.
   newsletter: {
     title: "一個月一封信",
     accent: "一個月",
@@ -78,7 +79,17 @@ export const zhReading = {
     placeholder: "you@example.com",
     submit: "訂閱",
     note: "一個月一封信。隨時可以取消訂閱。",
+    /** Texte du bouton pendant l'envoi. */
+    sending: "送出中…",
     success: "快完成了。請點擊我們剛剛寄出的確認信。",
-    error: "這個信箱沒有成功送出。請檢查後再試一次。",
+    /** Adresse deja connue de Buttondown : un message amical, pas une erreur. */
+    already: "這個信箱已經在訂閱名單上了，謝謝你！如果還沒收到確認信，請檢查垃圾信件匣。",
+    /** Adresse mal formee (code "invalid"). */
+    error: "這個信箱格式看起來不太對，請檢查後再試一次。",
+    limited: "送出次數有點多，請過一分鐘再試一次。",
+    /** Suivi d'un lien vers la page d'inscription Buttondown (failedLink). */
+    failed: "訂閱沒有成功。你可以稍後再試，或",
+    failedLink: "到這裡訂閱",
+    offline: "目前無法送出，請確認網路連線後再試。",
   },
 } as const;
