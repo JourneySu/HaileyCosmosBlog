@@ -275,6 +275,10 @@ src/
 
 ## 未來優化構想（非本次搬遷範圍，日後可考慮）
 
+- [ ] **About 頁的手機截圖**（2026-11-06 先隱藏）：About 頁「價值清單」右邊原本有一個畫出來的手機框（`PhoneShot.astro`），只在寬螢幕顯示，裡面放的是截圖 `public/reef-iphone-poster.webp`，目前還是**原主題 demo 的首頁畫面**。現在先在 `about.astro` 註解掉，但保留原本的兩欄排版，右邊空著，讓清單的分隔線維持原本的長度；元件和截圖檔都保留。之後要決定：
+  - **恢復並換成自己的截圖**：`pnpm poster` 會用 iPhone 尺寸（390 × 845）拍下本機 `dist/` 的首頁第一屏，輸出到 `public/reef-iphone-poster.webp`。需要先安裝 Playwright：`pnpm add -D playwright`、`pnpm exec playwright install chromium`，之後每次更新都是 `pnpm build` 再 `pnpm poster`。截圖不會自動更新，首頁一改就要重拍；預設拍的是淺色模式。恢復方式寫在 `about.astro` 的註解裡
+  - **完全不用**：刪掉 `public/reef-iphone-poster.webp`、`PhoneShot.astro`，以及 `package.json` 的 `poster` 指令和 `scripts/poster.mjs`
+
 - [ ] **文章底部「複製連結」分享功能**（2026-09-29 提出）：原本 `PostFooter.astro` 的「分享」區塊（電子郵件、X 兩個按鈕）已整段移除（見對話紀錄），使用者認為讀者直接用瀏覽器網址列複製分享即可。但字典裡 `src/i18n/ui/zh/reading.ts` 的 `post.copyLink`（"複製連結"）／`post.linkCopied`（"已複製連結"）這兩個翻譯字串**刻意保留未刪**——確認過整個專案目前沒有任何程式碼引用它們，是 Reef 主題原本就預留、但從未真正接上功能的死字串。使用者之後如果想在文章底部（原「分享」按鈕的位置）加回一顆「複製連結」按鈕，這兩個字串已經現成可用，只需要：
   1. 在 `PostFooter.astro` 加回一個按鈕（可放在標籤欄旁邊，恢復先前兩欄並排的版面，或找其他合適位置）
   2. 寫一小段用 `navigator.clipboard.writeText()` 複製目前網址的原生 script（不需要框架，符合 AGENTS.md「平台優先」的排梯規則），點擊後把按鈕文字從 `copyLink` 暫時換成 `linkCopied` 提示成功
