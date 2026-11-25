@@ -81,7 +81,7 @@ export const zhReading = {
     note: "每雙週一封信。隨時可以取消訂閱。",
     /** Texte du bouton pendant l'envoi. */
     sending: "送出中…",
-    success: "快完成了。請點擊我們剛剛寄出的確認信。",
+    success: "快完成了。已寄出確認信至信箱，請去信箱點擊[Confirm subscription]確認訂閱。",
     /** Adresse deja connue de Buttondown : un message amical, pas une erreur. */
     already: "這個信箱已經在訂閱名單上了，謝謝你！如果還沒收到確認信，請檢查垃圾信件匣。",
     /** Adresse mal formee (code "invalid"). */
