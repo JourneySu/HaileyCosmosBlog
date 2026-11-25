@@ -50,16 +50,18 @@ const ACCENT_2 = token("coral-400", "#ff7a59");
 
 // title : ce qui s'affiche en enorme. eyebrow : la petite ligne au-dessus.
 const PAGES = [
-  { slug: "default", eyebrow: "海莉閱讀宇宙", title: "Outside the loop, one page at a time." },
-  { slug: "blog", eyebrow: "海莉閱讀宇宙 · 文章", title: "Reading, thinking, writing, slowly." },
-  { slug: "topics", eyebrow: "海莉閱讀宇宙 · 主題", title: "Every note, sorted by what it means." },
-  { slug: "about", eyebrow: "海莉閱讀宇宙 · 關於", title: "A place to heal, slowly." },
+  { slug: "default", eyebrow: "HAILEY COSMOS", title: "Outside the loop\n迴圈外的海莉" },
+  { slug: "blog", eyebrow: "HAILEY COSMOS · 文章", title: "Outside the loop\n迴圈外的海莉 · 文章" },
+  { slug: "topics", eyebrow: "HAILEY COSMOS · 主題", title: "Outside the loop\n迴圈外的海莉 · 主題" },
+  { slug: "about", eyebrow: "HAILEY COSMOS · 關於", title: "Outside the loop\n迴圈外的海莉 · 關於" },
 ];
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 // Coupe le titre en 1 ou 2 lignes equilibrees, sans dependre d'une mesure de police.
 function twoLines(title) {
+  // Un "\n" explicite impose la coupure : utile pour le chinois, plus large que le latin.
+  if (title.includes("\n")) return title.split("\n").slice(0, 2);
   if (title.length <= 26) return [title];
   const words = title.split(" ");
   let best = [title, ""], bestDiff = Infinity;

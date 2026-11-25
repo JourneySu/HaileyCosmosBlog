@@ -14,12 +14,12 @@ export const zhPages = {
   home: {
     // Contient le nom du site (siteData.name) : BaseHead n'ajoute donc pas
     // le suffixe " | nom", le titre reste tel quel dans les resultats.
-    metaTitle: "海莉閱讀宇宙 Hailey Cosmos｜閱讀筆記與生活隨想",
+    metaTitle: "迴圈外的海莉 Hailey Cosmos｜閱讀筆記與生活隨想",
     metaDescription:
       "一個離開日復一日的迴圈後，重新尋找生命意義的地方。閱讀、思考、書寫，記錄我一步步療癒自己、找回生活重量的過程。",
     eyebrow: "Hailey Cosmos",
     /** "\n" force un retour a la ligne dans le titre du hero (Hero.astro le rend en <br>). */
-    heroTitle: "Outside the Loop\n海莉閱讀宇宙",
+    heroTitle: "Outside the Loop\n迴圈外的海莉",
     heroAccent: "Loop",
     heroLede: "寫給自己，寫給被困在生活迴圈裡的靈魂們。閱讀、思考、書寫，記錄我一步步療癒自己、找回生活重量的過程。",
     heroPrimary: "開始閱讀",

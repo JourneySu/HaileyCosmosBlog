@@ -14,6 +14,48 @@
 
 ---
 
+## v1.4.202611251513（2026-11-25）
+
+主題：網站名稱改為「迴圈外的海莉」，並重新設計分享卡。
+
+### 更改重點
+
+- **網站名稱改為「迴圈外的海莉」**：取代「海莉閱讀宇宙」；英文名稱「Hailey Cosmos」不變
+- **分享卡改版**：小標改為「HAILEY COSMOS」，大標題改為「Outside the loop／迴圈外的海莉」，取代原本的英文標語（例如「Outside the loop, one page at a time.」）
+- **分享卡標題可手動換行**：`scripts/og.mjs` 支援 `\n`，修正中文標題超出圖片右側被切掉的問題
+- **分享卡替代文字同步更新**
+
+---
+
+### 1. 網站名稱
+
+| 檔案 | 項目 | 改動 |
+|---|---|---|
+| `src/config/siteData.json.ts` | `name` | 「海莉閱讀宇宙」改為「迴圈外的海莉」：用於每頁標題後綴（例如「所有文章 \| 迴圈外的海莉」）、`og:site_name`、結構化資料 |
+| `src/i18n/ui/zh/pages.ts` | `metaTitle` | 迴圈外的海莉 Hailey Cosmos｜閱讀筆記與生活隨想 |
+| `src/i18n/ui/zh/pages.ts` | `heroTitle` | 首頁主標題第二行改為「迴圈外的海莉」：`"Outside the Loop\n迴圈外的海莉"` |
+
+### 2. 分享卡改版
+
+| 卡片 | 小標 | 大標題 |
+|---|---|---|
+| `default` | HAILEY COSMOS | Outside the loop／迴圈外的海莉 |
+| `blog` | HAILEY COSMOS · 文章 | Outside the loop／迴圈外的海莉 · 文章 |
+| `topics` | HAILEY COSMOS · 主題 | Outside the loop／迴圈外的海莉 · 主題 |
+| `about` | HAILEY COSMOS · 關於 | Outside the loop／迴圈外的海莉 · 關於 |
+
+- 已執行 `pnpm og` 重新產生 `public/og/*.png`。**這四張圖要一起 commit**：`pnpm build` 不會重新產生它們
+- `src/config/siteData.json.ts` 的分享卡替代文字（`defaultImage.alt`）改為「Hailey Cosmos: Outside the loop 迴圈外的海莉」，和圖片一致
+- 社群平台會快取分享預覽，部署後可能要等一段時間才更新，或用平台的除錯工具（例如 Facebook Sharing Debugger）重新抓取
+
+### 3. 分享卡標題換行修正
+
+**原本的問題**：`scripts/og.mjs` 的 `twoLines` 只看字數決定要不要換行，26 個字以內就排成一行。但中文字的寬度約是英文的兩倍，「Outside the loop 迴圈外的海莉」只有 23 個字，卻排不下一行，最後的「莉」被切掉。
+
+**修正**：`twoLines` 遇到標題裡有 `\n` 時，固定照 `\n` 分成兩行；沒有 `\n` 時維持原本依字數自動換行。
+
+---
+
 ## v1.3.202611061456（2026-11-06）
 
 主題：訂閱表單串接 Buttondown 電子報。

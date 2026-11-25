@@ -8,7 +8,7 @@ const siteData: SiteDataProps = {
   // og:site_name, donnees structurees). alternateName : le nom latin, affiche
   // comme marque dans la barre et le pied de page, et declare aux moteurs comme
   // autre nom du meme site.
-  name: "海莉閱讀宇宙",
+  name: "迴圈外的海莉",
   alternateName: "Hailey Cosmos",
   description:
     "一個離開日復一日的迴圈後，重新尋找生命意義的地方。閱讀、思考、書寫，記錄我一步步療癒自己、找回生活重量的過程。",
@@ -29,7 +29,7 @@ const siteData: SiteDataProps = {
 
   defaultImage: {
     src: "/og/default.png",
-    alt: "海莉閱讀宇宙 Hailey Cosmos: Outside the loop, one page at a time.",
+    alt: "Hailey Cosmos: Outside the loop 迴圈外的海莉",
   },
 };
 
