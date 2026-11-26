@@ -29,6 +29,11 @@ dist/
 # Pexels (scripts/covers.mjs n'est plus appele), il utilise ce qui est dans le
 # depot. Une image absente du depot casse donc le build de Cloudflare.
 
+# Sources brutes des couvertures (fonds generes, couvertures de livres) :
+# elles restent sur la machine locale. Seule la couverture composee, dans
+# src/assets/covers/, est versionnee.
+_素材/
+
 # Outillage local des autres assistants de code : jamais publie.
 # CLAUDE.md et .claude/settings.json, eux, font partie du produit : ils
 # disent a l'agent de l'acheteur ou sont les regles de la maison et ce

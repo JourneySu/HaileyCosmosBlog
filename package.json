@@ -30,6 +30,7 @@
     "app": "astro build && node scripts/app.mjs",
     "build": "node scripts/favicon.mjs && astro build",
     "check": "astro check",
+    "combine-cover": "node scripts/combine-cover.mjs",
     "dev": "astro dev",
     "predev": "node scripts/covers.mjs",
     "lint:house": "node scripts/house.mjs",
