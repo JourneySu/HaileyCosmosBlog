@@ -8,6 +8,7 @@ import { defineConfig } from "astro/config";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import rehypeCallouts from "rehype-callouts";
+import remarkBreaks from "remark-breaks";
 
 const DIST = fileURLToPath(new URL("./dist/", import.meta.url));
 
@@ -97,6 +98,10 @@ export default defineConfig({
             },
           },
         ],
+        // Un simple retour a la ligne devient un <br>, comme dans Obsidian : en
+        // Markdown standard il est fusionne en espace, et les billets ecrits
+        // ligne par ligne dans le vault s'affichaient en un seul bloc.
+        remarkBreaks,
       ],
       // Les callouts Obsidian ("> [!note]", etc.) : le theme visuel est
       // importe a part, dans src/styles/prose.css.
